@@ -21,10 +21,18 @@ def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
   total = 0
   for record in data:
     phrases = []
-    if record['title'][-1] == '.':
-      text = f"{record['title']} {record['abstract']}"
+    if record['title'] is None:
+      if record['abstract'] is None:
+        continue
+      else:
+        text = record['abstract']
+    elif record['abstract'] is None:
+      text = record['title']
     else:
-      text = f"{record['title']}. {record['abstract']}"
+      if record['title'][-1] == '.':
+        text = f"{record['title']} {record['abstract']}"
+      else:
+        text = f"{record['title']}. {record['abstract']}"
     tokens = processor(Sentence(text, use_tokenizer=tokenizer))
     for n in range(2, max_ngrams+1):
       phrases += [' '.join(g) for g in ngrams(tokens, n)]
