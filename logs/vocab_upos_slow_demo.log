@@ -1,0 +1,24 @@
+2021-07-06 18:13:58,276 About to create a vocabulary out of the repositories
+2021-07-06 18:13:58,276 Using the spacy tokenizer with the "en_core_web_sm" model.
+2021-07-06 18:13:58,276 Using the WordNetLemmatizer of NLTK.
+2021-07-06 18:13:58,276 Using the upos-fast model of flair for POS-tagging.
+2021-07-06 18:13:58,276 Extracting N-grams of up to length 4.
+2021-07-06 18:14:23,710 Processed oai:depositonce.tu-berlin.de:11303/3258 - 1/29336.
+2021-07-06 18:14:31,040 Processed oai:depositonce.tu-berlin.de:11303/5583 - 2/29336.
+2021-07-06 18:14:49,152 Processed oai:depositonce.tu-berlin.de:11303/3382 - 3/29336.
+2021-07-06 18:15:00,353 Processed oai:depositonce.tu-berlin.de:11303/11638 - 4/29336.
+2021-07-06 18:15:21,578 Processed oai:depositonce.tu-berlin.de:11303/4553 - 5/29336.
+2021-07-06 18:15:42,662 Processed oai:depositonce.tu-berlin.de:11303/8189 - 6/29336.
+2021-07-06 18:16:07,118 Processed oai:depositonce.tu-berlin.de:11303/12590 - 7/29336.
+2021-07-06 18:16:11,666 Processed oai:depositonce.tu-berlin.de:11303/10338 - 8/29336.
+2021-07-06 18:16:43,875 Processed oai:depositonce.tu-berlin.de:11303/2732 - 9/29336.
+2021-07-06 18:17:25,316 Processed oai:depositonce.tu-berlin.de:11303/5394 - 10/29336.
+2021-07-06 18:17:39,146 Processed oai:depositonce.tu-berlin.de:11303/11424 - 11/29336.
+2021-07-06 18:17:51,855 Processed oai:depositonce.tu-berlin.de:11303/6892 - 12/29336.
+2021-07-06 18:18:07,748 Processed oai:depositonce.tu-berlin.de:11303/8078 - 13/29336.
+2021-07-06 18:18:16,435 Processed oai:depositonce.tu-berlin.de:11303/7454 - 14/29336.
+2021-07-06 18:18:34,278 Processed oai:depositonce.tu-berlin.de:11303/5948 - 15/29336.
+2021-07-06 18:18:38,641 Processed oai:depositonce.tu-berlin.de:11303/1785 - 16/29336.
+2021-07-06 18:18:43,625 Processed oai:depositonce.tu-berlin.de:11303/10110 - 17/29336.
+2021-07-06 18:18:54,160 Processed oai:depositonce.tu-berlin.de:11303/7500 - 18/29336.
+2021-07-06 18:19:11,957 Processed oai:depositonce.tu-berlin.de:11303/1411 - 19/29336.
