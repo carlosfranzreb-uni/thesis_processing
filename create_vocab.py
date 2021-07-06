@@ -100,4 +100,4 @@ if __name__ == "__main__":
   logging.info('Using the upos-fast model of flair for POS-tagging.')
   logging.info('Extracting N-grams of up to length 4.')
   vocab = create_vocab(data, tokenizer, tagger, lemmatizer, process)
-  json.dump(vocab, open('data/vocab/repo_vocab.json'))
+  json.dump(vocab, open('data/vocab/repo_vocab.json', 'w'))
