@@ -5,7 +5,9 @@ and phrases as keys and their number of occurrences as values. """
 import json
 from string import punctuation
 from collections import Counter
-from xml.etree import ElementTree as ET
+import logging
+from time import time
+
 from flair.data import Sentence
 from flair.tokenization import SpacyTokenizer
 from flair.models import SequenceTagger
@@ -13,16 +15,16 @@ from nltk.stem import WordNetLemmatizer
 from nltk.util import ngrams
 from nltk.corpus import stopwords, wordnet
 
-from load_data import DataLoader
-
 
 def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
   vocab = Counter()
-  total = 0
+  processed, total = 0, len(data)
   for record in data:
+    processed += 1
     phrases = []
     if record['title'] is None:
       if record['abstract'] is None:
+        logging.info(f"Empty record: {record['id']} - {processed}/{total}.")
         continue
       else:
         text = record['abstract']
@@ -37,6 +39,7 @@ def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
     for n in range(2, max_ngrams+1):
       phrases += [' '.join(g) for g in ngrams(tokens, n)]
     vocab.update(filter(tokens + phrases))
+    logging.info(f"Processed {record['id']} - {processed}/{total}.")
   return vocab
 
 
@@ -61,6 +64,7 @@ def process(sentence):
       lemmas.append(token.text.lower())
   return lemmas
 
+
 def filter(phrases):
   """ Filter out phrases that contain a punctuation sign or single words
   that are a punctuation signs or stopwords. """
@@ -79,7 +83,14 @@ def filter(phrases):
 
 
 if __name__ == "__main__":
+  logging.basicConfig(
+    filename=f"logs/vocab_{str(int(time()))}.log",
+    format='%(asctime)s %(message)s',
+    level=logging.INFO
+  )
   data = json.load(open('data/json/dim/all/data.json'))
   tokenizer = SpacyTokenizer('en_core_web_sm')
+  logging.info('About to create a vocabulary out of the repositories')
+  logging.info('Using the spacy tokenizer with the "en_core_web_sm" model.')
   vocab = create_vocab(data, tokenizer, process)
   json.dump(vocab, open('data/vocab/repo_vocab.json'))
