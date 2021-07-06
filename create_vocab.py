@@ -16,7 +16,8 @@ from nltk.util import ngrams
 from nltk.corpus import stopwords, wordnet
 
 
-def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
+def create_vocab(data, tokenizer, tagger, lemmatizer,
+    processor=lambda x,y,z: x, max_ngrams=4):
   vocab = Counter()
   processed, total = 0, len(data)
   for record in data:
@@ -35,7 +36,10 @@ def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
         text = f"{record['title']} {record['abstract']}"
       else:
         text = f"{record['title']}. {record['abstract']}"
-    tokens = processor(Sentence(text, use_tokenizer=tokenizer))
+    tokens = processor(
+      Sentence(text, use_tokenizer=tokenizer),
+      tagger, lemmatizer
+    )
     for n in range(2, max_ngrams+1):
       phrases += [' '.join(g) for g in ngrams(tokens, n)]
     vocab.update(filter(tokens + phrases))
@@ -43,10 +47,8 @@ def create_vocab(data, tokenizer, processor=lambda x: x, max_ngrams=4):
   return vocab
 
 
-def process(sentence):
+def process(sentence, tagger, lemmatizer):
   """ Given a Sentence object, lower-case and lemmatize the words. """
-  tagger = SequenceTagger.load('upos')
-  lemm = WordNetLemmatizer()
   tagger.predict(sentence)
   tag_dict = {
     'ADJ': wordnet.ADJ,
@@ -57,7 +59,7 @@ def process(sentence):
   lemmas = []
   for token in sentence:
     if token.labels[0].value in tag_dict:
-      lemmas.append(lemm.lemmatize(
+      lemmas.append(lemmatizer.lemmatize(
         token.text.lower(), tag_dict[token.labels[0].value])
       )
     else:
@@ -90,7 +92,12 @@ if __name__ == "__main__":
   )
   data = json.load(open('data/json/dim/all/data.json'))
   tokenizer = SpacyTokenizer('en_core_web_sm')
+  lemmatizer = WordNetLemmatizer()
+  tagger = SequenceTagger('upos-fast')
   logging.info('About to create a vocabulary out of the repositories')
   logging.info('Using the spacy tokenizer with the "en_core_web_sm" model.')
-  vocab = create_vocab(data, tokenizer, process)
+  logging.info('Using the WordNetLemmatizer of NLTK.')
+  logging.info('Using the upos-fast model of flair for POS-tagging.')
+  logging.info('Extracting N-grams of up to length 4.')
+  vocab = create_vocab(data, tokenizer, tagger, lemmatizer, process)
   json.dump(vocab, open('data/vocab/repo_vocab.json'))
