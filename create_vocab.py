@@ -93,7 +93,7 @@ if __name__ == "__main__":
   data = json.load(open('data/json/dim/all/data.json'))
   tokenizer = SpacyTokenizer('en_core_web_sm')
   lemmatizer = WordNetLemmatizer()
-  tagger = SequenceTagger('upos-fast')
+  tagger = SequenceTagger.load('upos-fast')
   logging.info('About to create a vocabulary out of the repositories')
   logging.info('Using the spacy tokenizer with the "en_core_web_sm" model.')
   logging.info('Using the WordNetLemmatizer of NLTK.')
