@@ -90,9 +90,35 @@ def filter(phrases):
 
 
 def filter_vocab(vocab, bottom=1, top=int(.8*N_DOCS)):
-  """ Return a vocab where the words that occur 'bottom' or less times are
-  removed and also those that occur 'top' or more times. """
-  return {k: v for k, v in vocab.items() if v > bottom and v < top}
+  """ Return a vocab where the entries that occur 'bottom' or less times are
+  removed and also those that occur 'top' or more times. Entries that appear
+  as many times as larger entries that contain it should also be removed, as
+  they only make sense in their larger context. For example, if 'supervised'
+  and 'supervised learning' both occur 100 times, 'supervised' should be
+  removed. Also, if 'supervised' occurs 101 times it should also be removed,
+  as it only occurs once without being in 'supervised learning'. """
+  filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
+  groups = {}
+  for entry, freq in filtered.items():
+    if freq in groups:
+      groups[freq].append(entry)
+    else:
+      groups[freq] = [entry]
+  remove = set()
+  for group in groups.values():  # check for substring occuring equally
+    for i in range(len(group)):
+      for j in range(len(group)):
+        if i != j and group[i] in group[j]:
+          remove.add(group[i])
+  for i in groups.keys():  # check for substring occuring once more
+    if i+1 in groups.keys():
+      for entry in groups[i+1]:
+        for other_entry in groups[i]:
+          if entry in other_entry:
+            remove.add(entry)
+  for entry in remove:
+    filtered.pop(entry)
+  return filtered
 
 
 def main_create():
