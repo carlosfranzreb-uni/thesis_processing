@@ -85,8 +85,9 @@ def filter(phrases):
 
 
 if __name__ == "__main__":
+  start = int(time())
   logging.basicConfig(
-    filename=f"logs/vocab_{str(int(time()))}.log",
+    filename=f"logs/vocab_{start}.log",
     format='%(asctime)s %(message)s',
     level=logging.INFO
   )
@@ -100,4 +101,4 @@ if __name__ == "__main__":
   logging.info('Using the upos-fast model of flair for POS-tagging.')
   logging.info('Extracting N-grams of up to length 4.')
   vocab = create_vocab(data, tokenizer, tagger, lemmatizer, process)
-  json.dump(vocab, open('data/vocab/repo_vocab.json', 'w'))
+  json.dump(vocab, open(f'data/vocab/repo_vocab_{start}.json', 'w'))
