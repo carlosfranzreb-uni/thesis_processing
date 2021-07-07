@@ -95,7 +95,7 @@ def filter_vocab(vocab, bottom=1, top=int(.8*N_DOCS)):
   return {k: v for k, v in vocab.items() if v > bottom and v < top}
 
 
-if __name__ == "__main__":
+def main_create():
   start = int(time())
   logging.basicConfig(
     filename=f"logs/vocab_{start}.log",
@@ -113,3 +113,15 @@ if __name__ == "__main__":
   logging.info('Extracting N-grams of up to length 4.')
   vocab = create_vocab(data, tokenizer, tagger, lemmatizer, process)
   json.dump(vocab, open(f'data/vocab/repo_vocab_{start}.json', 'w'))
+
+
+def main_filter(vocab_file, filtered_file):
+  vocab = json.load(open(vocab_file))
+  filtered = filter_vocab(vocab)
+  json.dump(filtered, open(filtered_file, 'w'))
+
+
+if __name__ == "__main__":
+  vocab_file = ''
+  filtered_file = ''
+  main_filter(vocab_file, filtered_file)
