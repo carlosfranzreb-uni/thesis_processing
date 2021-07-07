@@ -18,9 +18,6 @@ from nltk.util import ngrams
 from nltk.corpus import stopwords, wordnet
 
 
-N_DOCS = 29336  # no. of docs, as seen in repo_vocab_1.log
-
-
 def create_vocab(data, tokenizer, tagger, lemmatizer,
     processor=lambda x,y,z: x, max_ngrams=4):
   vocab = Counter()
@@ -89,7 +86,7 @@ def filter(phrases):
   return filtered
 
 
-def filter_vocab(vocab, bottom=1, top=int(.8*N_DOCS)):
+def filter_vocab(vocab, bottom=1, top=1000):
   """ Return a vocab where the entries that occur 'bottom' or less times are
   removed and also those that occur 'top' or more times. Entries that appear
   as many times as larger entries that contain it should also be removed, as
@@ -148,6 +145,6 @@ def main_filter(vocab_file, filtered_file):
 
 
 if __name__ == "__main__":
-  vocab_file = ''
-  filtered_file = ''
+  vocab_file = 'data/vocab/repo_vocab_1.json'
+  filtered_file = 'data/vocab/repo_vocab_1_filtered.json'
   main_filter(vocab_file, filtered_file)
