@@ -1,5 +1,7 @@
 """ Create the vocabulary. The vocab is a dictionary containing the words
-and phrases as keys and their number of occurrences as values. """
+and phrases as keys and their number of occurrences as values. Even if a
+word or phrase appears multiple times in a document, it is counted only
+once. This number illustrates how many documents contain a word/phrase. """
 
 
 import json
@@ -79,7 +81,7 @@ def filter(phrases):
       for s in signs:
         if s in p:
           keep = False
-      if keep is True:
+      if keep is True and p not in filtered:
         filtered.append(p)
   return filtered
 
