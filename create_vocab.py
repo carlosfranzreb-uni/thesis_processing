@@ -95,24 +95,36 @@ def filter_vocab(vocab, bottom=1, top=1000):
   removed. Also, if 'supervised' occurs 101 times it should also be removed,
   as it only occurs once without being in 'supervised learning'. """
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
+  logging.info(f'Vocab size after removing extrema: {len(filtered)}')
   groups = {}
   for entry, freq in filtered.items():
     if freq in groups:
       groups[freq].append(entry)
     else:
       groups[freq] = [entry]
+  logging.info(f'Entries grouped by frequency. There are {len(groups)} groups.')
+  logging.info(f'Checking for substrings that occur equally.')
   remove = set()
-  for group in groups.values():  # check for substring occuring equally
+  for key in groups.keys():
+    logging.info(f'Checking group with frequency {key}.')
+    group = groups[key]
     for i in range(len(group)):
       for j in range(len(group)):
         if i != j and group[i] in group[j]:
+          logging.info(f'Remove {group[i]}. It is a substring of {group[j]}.')
           remove.add(group[i])
-  for i in groups.keys():  # check for substring occuring once more
+  logging.info(f'Checking for substrings that occur once more.')
+  for i in groups.keys():
+    logging.info(f'Checking group with frequency {key}.')
     if i+1 in groups.keys():
+      logging.info(f'A group with frequency {i+1} exists.')
       for entry in groups[i+1]:
         for other_entry in groups[i]:
           if entry in other_entry:
+            logging.info(f'Remove {entry}. It is a substring of {other_entry}.')
             remove.add(entry)
+    else:
+      logging.info(f'There is no group with frequency {i+1}.')
   for entry in remove:
     filtered.pop(entry)
   return filtered
@@ -139,9 +151,19 @@ def main_create():
 
 
 def main_filter(vocab_file, filtered_file):
+  start = int(time())
+  logging.basicConfig(
+    filename=f"logs/filter_vocab_{start}.log",
+    format='%(asctime)s %(message)s',
+    level=logging.INFO
+  )
   vocab = json.load(open(vocab_file))
+  logging.info(f'Starting to filter vocab "{vocab_file}".')
+  logging.info(f'Starting size of the vocab: {len(vocab)}')
   filtered = filter_vocab(vocab)
+  logging.info('Filtering completed.')
   json.dump(filtered, open(filtered_file, 'w'))
+  logging.info(f'Filtered vocab dumped to "{filtered_file}"')
 
 
 if __name__ == "__main__":
