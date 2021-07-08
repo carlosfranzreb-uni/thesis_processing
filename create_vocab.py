@@ -110,7 +110,7 @@ def filter_vocab(vocab, bottom=1, top=1000):
     group = groups[key]
     for i in range(len(group)):
       for j in range(len(group)):
-        if i != j and group[i] in group[j]:
+        if i != j and is_included(group[i], group[j]):
           logging.info(f'Remove {group[i]}. It is a substring of {group[j]}.')
           remove.add(group[i])
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
@@ -121,7 +121,7 @@ def filter_vocab(vocab, bottom=1, top=1000):
       logging.info(f'A group with frequency {i+1} exists.')
       for entry in groups[i+1]:
         for other_entry in groups[i]:
-          if entry in other_entry:
+          if is_included(entry, other_entry):
             logging.info(f'Remove {entry}. It is a substring of {other_entry}.')
             remove.add(entry)
     else:
@@ -130,6 +130,14 @@ def filter_vocab(vocab, bottom=1, top=1000):
   for entry in remove:
     filtered.pop(entry)
   return filtered
+
+
+def is_included(included, includes):
+  """ Return True if the string 'included' is an n-gram that is part of
+  'includes', a larger n-gram. The match must include at least one white space,
+  either at the beginning or the end of 'included', to avoid matches for inputs
+  like 'selling' and 'counselling'. """
+  return included + ' ' in includes or ' ' + included in includes
 
 
 def main_create():
