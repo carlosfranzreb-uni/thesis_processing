@@ -115,6 +115,7 @@ def filter_vocab(vocab, bottom=1, top=1000):
             f'Remove "{group[i]}"". It is a substring of "{group[j]}".'
           )
           remove.add(group[i])
+          break
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
   logging.info(f'Checking for substrings that occur once more.')
   for i in groups.keys():
@@ -128,6 +129,7 @@ def filter_vocab(vocab, bottom=1, top=1000):
               f'Remove "{entry}". It is a substring of "{other_entry}".'
             )
             remove.add(entry)
+            break
     else:
       logging.info(f'There is no group with frequency {i+1}.')
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
