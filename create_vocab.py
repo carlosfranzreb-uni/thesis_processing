@@ -140,10 +140,16 @@ def filter_vocab(vocab, bottom=1, top=1000):
 
 def is_included(included, includes):
   """ Return True if the string 'included' is an n-gram that is part of
-  'includes', a larger n-gram. The match must include at least one white space,
-  either at the beginning or the end of 'included', to avoid matches for inputs
-  like 'selling' and 'counselling'. """
-  return included + ' ' in includes or ' ' + included in includes
+  'includes', a larger n-gram. The tokens of the smaller n-grams must be 
+  part of the larger n-gram. Matching subwords such as 'selling' and 
+  'counselling' should be avoided. """
+  if includes[:len(included)+1] == included + ' ':  # match at the beginning
+    return True
+  elif includes[-len(included)-1:] == ' ' + included:  # match at the end
+    return True
+  elif f' {included} ' in includes:  # match in the middle
+    return True
+  return False
 
 
 def main_create():
