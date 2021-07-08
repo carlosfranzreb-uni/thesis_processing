@@ -112,7 +112,7 @@ def filter_vocab(vocab, bottom=1, top=1000):
       for j in range(len(group)):
         if i != j and is_included(group[i], group[j]):
           logging.info(
-            f'Remove "{group[i]}"". It is a substring of "{group[j]}".'
+            f'Remove "{group[i]}". It is a substring of "{group[j]}".'
           )
           remove.add(group[i])
           break
