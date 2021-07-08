@@ -111,7 +111,9 @@ def filter_vocab(vocab, bottom=1, top=1000):
     for i in range(len(group)):
       for j in range(len(group)):
         if i != j and is_included(group[i], group[j]):
-          logging.info(f'Remove {group[i]}. It is a substring of {group[j]}.')
+          logging.info(
+            f'Remove "{group[i]}"". It is a substring of "{group[j]}".'
+          )
           remove.add(group[i])
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
   logging.info(f'Checking for substrings that occur once more.')
@@ -122,7 +124,9 @@ def filter_vocab(vocab, bottom=1, top=1000):
       for entry in groups[i+1]:
         for other_entry in groups[i]:
           if is_included(entry, other_entry):
-            logging.info(f'Remove {entry}. It is a substring of {other_entry}.')
+            logging.info(
+              f'Remove "{entry}". It is a substring of "{other_entry}".'
+            )
             remove.add(entry)
     else:
       logging.info(f'There is no group with frequency {i+1}.')
