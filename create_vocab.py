@@ -86,14 +86,18 @@ def filter(phrases):
   return filtered
 
 
-def filter_vocab(vocab, bottom=1, top=1000):
+def filter_vocab(vocab, remove_file, bottom=1, top=1000):
   """ Return a vocab where the entries that occur 'bottom' or less times are
   removed and also those that occur 'top' or more times. Entries that appear
   as many times as larger entries that contain it should also be removed, as
   they only make sense in their larger context. For example, if 'supervised'
   and 'supervised learning' both occur 100 times, 'supervised' should be
   removed. Also, if 'supervised' occurs 101 times it should also be removed,
-  as it only occurs once without being in 'supervised learning'. """
+  as it only occurs once without being in 'supervised learning'. The entries
+  that should be removed are written to 'remove_file' to avoid losing
+  progress if the program is terminated. """
+  remove = [k for k, v in vocab.items() if v <= bottom or v >= top]
+  json.dump(remove, open(remove_file, 'w'))
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
   logging.info(f'Vocab size after removing extrema: {len(filtered)}')
   groups = {}
@@ -104,7 +108,6 @@ def filter_vocab(vocab, bottom=1, top=1000):
       groups[freq] = [entry]
   logging.info(f'Entries grouped by frequency. There are {len(groups)} groups.')
   logging.info(f'Checking for substrings that occur equally.')
-  remove = set()
   for key in groups.keys():
     logging.info(f'Checking group with frequency {key}.')
     group = groups[key]
@@ -114,7 +117,9 @@ def filter_vocab(vocab, bottom=1, top=1000):
           logging.info(
             f'Remove "{group[i]}". It is a substring of "{group[j]}".'
           )
-          remove.add(group[i])
+          if group[i] not in remove:
+            remove.append(group[i])
+            json.dump(remove, open(remove_file, 'w'))
           break
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
   logging.info(f'Checking for substrings that occur once more.')
@@ -128,8 +133,10 @@ def filter_vocab(vocab, bottom=1, top=1000):
             logging.info(
               f'Remove "{entry}". It is a substring of "{other_entry}".'
             )
-            remove.add(entry)
-            break
+          if group[i] not in remove:
+            remove.append(group[i])
+            json.dump(remove, open(remove_file, 'w'))
+          break
     else:
       logging.info(f'There is no group with frequency {i+1}.')
   logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
@@ -172,7 +179,7 @@ def main_create():
   json.dump(vocab, open(f'data/vocab/repo_vocab_{start}.json', 'w'))
 
 
-def main_filter(vocab_file, filtered_file):
+def main_filter(vocab_file, filtered_file, remove_file):
   start = int(time())
   logging.basicConfig(
     filename=f"logs/filter_vocab_{start}.log",
@@ -182,7 +189,7 @@ def main_filter(vocab_file, filtered_file):
   vocab = json.load(open(vocab_file))
   logging.info(f'Starting to filter vocab "{vocab_file}".')
   logging.info(f'Starting size of the vocab: {len(vocab)}')
-  filtered = filter_vocab(vocab)
+  filtered = filter_vocab(vocab, remove_file)
   logging.info('Filtering completed.')
   json.dump(filtered, open(filtered_file, 'w'))
   logging.info(f'Filtered vocab dumped to "{filtered_file}"')
@@ -191,4 +198,5 @@ def main_filter(vocab_file, filtered_file):
 if __name__ == "__main__":
   vocab_file = 'data/vocab/repo_vocab_1.json'
   filtered_file = 'data/vocab/repo_vocab_1_filtered.json'
-  main_filter(vocab_file, filtered_file)
+  remove_file = 'data/vocab/repo_vocab_1_removed.json'
+  main_filter(vocab_file, filtered_file, remove_file)
