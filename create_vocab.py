@@ -96,7 +96,7 @@ def filter_vocab(vocab, remove_file, bottom=1, top=1000):
   as it only occurs once without being in 'supervised learning'. The entries
   that should be removed are written to 'remove_file' to avoid losing
   progress if the program is terminated. 
-  The file 'remmove_file' may contain removed phrases. If it does, they 
+  The file 'remove_file' may contain removed phrases. If it does, they 
   should be removed from the vocab before starting again. """
   remove = json.load(open(remove_file))
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
