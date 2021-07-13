@@ -86,7 +86,7 @@ def filter(phrases):
   return filtered
 
 
-def filter_vocab(vocab, remove_file, bottom=1, top=1000):
+def filter_vocab(vocab_file, bottom=1, top=1000):
   """ Return a vocab where the entries that occur 'bottom' or less times are
   removed and also those that occur 'top' or more times. Entries that appear
   as many times as larger entries that contain it should also be removed, as
@@ -98,12 +98,14 @@ def filter_vocab(vocab, remove_file, bottom=1, top=1000):
   progress if the program is terminated. 
   The file 'remove_file' may contain removed phrases. If it does, they 
   should be removed from the vocab before starting again. """
+  vocab = json.load(open(vocab_file))
+  remove_file = f'{vocab_file[:-5]}_removed.json'
   remove = json.load(open(remove_file))
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
   logging.info(f'Vocab size after removing extrema: {len(filtered)}.')
   if len(remove) == 0:
     remove = [k for k, v in vocab.items() if v <= bottom or v >= top]
-    json.dump(remove, open(remove_file, 'w'))
+    json.dump(remove, open(f'{vocab_file[:-5]}_extrema.json', 'w'))
   else:
     logging.info(f'{len(remove)} phrases have already been removed.')
     filtered = {k: v for k, v in filtered.items() if k not in remove}
@@ -189,7 +191,7 @@ def main_create():
   json.dump(vocab, open(f'data/vocab/repo_vocab_{start}.json', 'w'))
 
 
-def main_filter(vocab_file, filtered_file, remove_file):
+def main_filter(vocab_file):
   start = int(time())
   logging.basicConfig(
     filename=f"logs/filter_vocab_{start}.log",
@@ -199,8 +201,9 @@ def main_filter(vocab_file, filtered_file, remove_file):
   vocab = json.load(open(vocab_file))
   logging.info(f'Starting to filter vocab "{vocab_file}".')
   logging.info(f'Starting size of the vocab: {len(vocab)}')
-  filtered = filter_vocab(vocab, remove_file)
+  filtered = filter_vocab(vocab_file)
   logging.info('Filtering completed.')
+  filtered_file = f'{vocab_file[:-5]}_filtered.json'
   json.dump(filtered, open(filtered_file, 'w'))
   logging.info(f'Filtered vocab dumped to "{filtered_file}"')
 
@@ -208,5 +211,4 @@ def main_filter(vocab_file, filtered_file, remove_file):
 if __name__ == "__main__":
   vocab_file = 'data/vocab/repo_vocab_1.json'
   filtered_file = 'data/vocab/repo_vocab_1_filtered.json'
-  remove_file = 'data/vocab/repo_vocab_1_removed.json'
-  main_filter(vocab_file, filtered_file, remove_file)
+  main_filter(vocab_file)
