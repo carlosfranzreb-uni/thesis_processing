@@ -109,7 +109,7 @@ def filter_vocab(vocab, remove_file, bottom=1, top=1000):
     filtered = {k: v for k, v in filtered.items() if k not in remove}
     logging.info(f'Vocab size after the last run: {len(filtered)}.')
     remove = []
-    remove_file += '1'
+    remove_file += '_1'
   groups = {}
   for entry, freq in filtered.items():
     if freq in groups:
