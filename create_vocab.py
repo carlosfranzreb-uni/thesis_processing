@@ -5,6 +5,7 @@ once. This number illustrates how many documents contain a word/phrase. """
 
 
 import json
+import os
 from string import punctuation
 from collections import Counter
 import logging
@@ -100,7 +101,10 @@ def filter_vocab(vocab_file, bottom=1, top=1000):
   should be removed from the vocab before starting again. """
   vocab = json.load(open(vocab_file))
   remove_file = f'{vocab_file[:-5]}_removed.json'
-  remove = json.load(open(remove_file))
+  if os.path.isfile(remove_file):
+    remove = json.load(open(remove_file))
+  else:
+    remove = []
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
   logging.info(f'Vocab size after removing extrema: {len(filtered)}.')
   if len(remove) == 0:
