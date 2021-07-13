@@ -95,11 +95,21 @@ def filter_vocab(vocab, remove_file, bottom=1, top=1000):
   removed. Also, if 'supervised' occurs 101 times it should also be removed,
   as it only occurs once without being in 'supervised learning'. The entries
   that should be removed are written to 'remove_file' to avoid losing
-  progress if the program is terminated. """
-  remove = [k for k, v in vocab.items() if v <= bottom or v >= top]
-  json.dump(remove, open(remove_file, 'w'))
+  progress if the program is terminated. 
+  The file 'remmove_file' may contain removed phrases. If it does, they 
+  should be removed from the vocab before starting again. """
+  remove = json.load(open(remove_file))
   filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
-  logging.info(f'Vocab size after removing extrema: {len(filtered)}')
+  logging.info(f'Vocab size after removing extrema: {len(filtered)}.')
+  if len(remove) == 0:
+    remove = [k for k, v in vocab.items() if v <= bottom or v >= top]
+    json.dump(remove, open(remove_file, 'w'))
+  else:
+    logging.info(f'{len(remove)} phrases have already been removed.')
+    filtered = {k: v for k, v in filtered.items() if k not in remove}
+    logging.info(f'Vocab size after the last run: {len(filtered)}.')
+    remove = []
+    remove_file += '1'
   groups = {}
   for entry, freq in filtered.items():
     if freq in groups:
