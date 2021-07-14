@@ -23,20 +23,22 @@ from time import time
 
 
 class VocabFilterer:
-  def __init__(self, vocab_file, bottom=1, top=1000):
-    """ Dump a filtered vocabulary starting with the one in 'vocab_file' by
-    executing the four steps explained in the docstring. Each is performed by a
-    different function. After each step, an intermediate result is saved, named
-    as 'vocab_file' and the step that was just performed appended to it. Store
-    also the removed entries in each step. """
+  def __init__(self, vocab_file):
     logging.basicConfig(
       filename=f"logs/filter_vocab_{int(time())}.log",
       format='%(asctime)s %(message)s',
       level=logging.INFO
     )
-    logging.info(f'Starting to filter vocab "{vocab_file}".')
     self.root_name = vocab_file[:-5]
     self.vocab = json.load(open(vocab_file))
+
+  def filter(self, bottom=1, top=1000):
+    """ Dump a filtered vocabulary starting with the one in 'vocab_file' by
+    executing the four steps explained in the docstring. Each is performed by a
+    different function. After each step, an intermediate result is saved, named
+    as 'vocab_file' and the step that was just performed appended to it. Store
+    also the removed entries in each step. """
+    logging.info(f'Starting to filter vocab "{self.root_name}".')
     logging.info(f'Starting size of the vocab: {len(self.vocab)}')
     self.vocab = self.step_1(bottom, top)
     self.dump(self.vocab, '_step_1')
@@ -122,6 +124,9 @@ class VocabFilterer:
     for entry in remove:
       del self.vocab[entry]
     logging.info(f'Vocab size is now {len(self.vocab)}.')
+  
+  def step_4(self):
+    pass
 
 
 def is_included(included, includes):
