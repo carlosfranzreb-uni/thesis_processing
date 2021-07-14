@@ -22,79 +22,106 @@ import logging
 from time import time
 
 
-def filter_vocab(vocab_file, bottom=1, top=1000):
-  """ Return a vocab where the entries that occur 'bottom' or less times are
-  removed and also those that occur 'top' or more times. Entries that appear
-  as many times as larger entries that contain it should also be removed, as
-  they only make sense in their larger context. For example, if 'supervised'
-  and 'supervised learning' both occur 100 times, 'supervised' should be
-  removed. Also, if 'supervised' occurs 101 times it should also be removed,
-  as it only occurs once without being in 'supervised learning'. The entries
-  that should be removed are written to 'remove_file' to avoid losing
-  progress if the program is terminated. 
-  The file 'remove_file' may contain removed phrases. If it does, they 
-  should be removed from the vocab before starting again. """
-  vocab = json.load(open(vocab_file))
-  logging.info(f'Starting size of the vocab: {len(vocab)}')
-  remove_file = f'{vocab_file[:-5]}_removed.json'
-  if os.path.isfile(remove_file):
-    remove = json.load(open(remove_file))
-  else:
+class VocabFilterer:
+  def __init__(self, vocab_file, bottom=1, top=1000):
+    """ Dump a filtered vocabulary starting with the one in 'vocab_file' by
+    executing the four steps explained in the docstring. Each is performed by a
+    different function. After each step, an intermediate result is saved, named
+    as 'vocab_file' and the step that was just performed appended to it. Store
+    also the removed entries in each step. """
+    logging.basicConfig(
+      filename=f"logs/filter_vocab_{int(time())}.log",
+      format='%(asctime)s %(message)s',
+      level=logging.INFO
+    )
+    logging.info(f'Starting to filter vocab "{vocab_file}".')
+    self.root_name = vocab_file[:-5]
+    self.vocab = json.load(open(vocab_file))
+    logging.info(f'Starting size of the vocab: {len(self.vocab)}')
+    self.vocab = self.step_1(bottom, top)
+    self.dump(self.vocab, '_step_1')
+    self.vocab = self.step_2()
+    self.groups = self.create_groups()
+    self.dump(self.vocab, '_step_2')
+    self.vocab = self.step_3()
+    self.dump(self.vocab, '_step_3')
+    self.vocab = self.step_4()
+    self.dump(self.vocab, '_filtered')
+  
+  def step_1(self, bottom, top):
+    """ Remove entries that occur 'bottom' or less times and entries that occur
+    'top' or more times. Store those entries as a dictionary with two keys
+    '{bottom}_or_less' and '{top}_or_more'. """
+    self.vocab = {
+      k: v for k, v in self.vocab.items() if v > bottom and v < top
+    }
+    logging.info(f'Vocab size after removing extrema: {len(self.vocab)}.')
+    removed = {
+      f'{bottom}_or_less': [k for k, v in self.vocab.items() if v <= bottom],
+      f'{top}_or_more': [k for k, v in self.vocab.items() if v >= top]
+    }
+    logging.info(f'Bottom extrema: {len(removed[f"{bottom}_or_less"])}.')
+    logging.info(f'Top extrema: {len(removed[f"{top}_or_more"])}.')
+    self.dump(removed, '_step_1_removed.json')
+  
+  def create_groups(self):
+    """ Group the entries of the vocabulary by frequency. Return a dict
+    with the frequency as key and a list of its entries as value. """
+    groups = {}
+    for entry, freq in self.vocab.items():
+      if freq in groups:
+        groups[freq].append(entry)
+      else:
+        groups[freq] = [entry]
+    logging.info(f'Entries grouped by frequency. There are {len(groups)} groups.')
+    return groups
+
+  def step_2(self):
+    """ Remove entries that occur as often as larger ones that contain them by
+    using 'self.groups', where the entries are grouped by frequency. Store
+    the removed words."""
+    logging.info(f'Checking for substrings that occur equally.')
     remove = []
-  filtered = {k: v for k, v in vocab.items() if v > bottom and v < top}
-  logging.info(f'Vocab size after removing extrema: {len(filtered)}.')
-  if len(remove) == 0:
-    remove = [k for k, v in vocab.items() if v <= bottom or v >= top]
-    json.dump(remove, open(f'{vocab_file[:-5]}_extrema.json', 'w'))
-  else:
-    logging.info(f'{len(remove)} phrases have already been removed.')
-    filtered = {k: v for k, v in filtered.items() if k not in remove}
-    logging.info(f'Vocab size after the last run: {len(filtered)}.')
-    remove_file += '_1'
-  remove = []
-  groups = {}
-  for entry, freq in filtered.items():
-    if freq in groups:
-      groups[freq].append(entry)
-    else:
-      groups[freq] = [entry]
-  logging.info(f'Entries grouped by frequency. There are {len(groups)} groups.')
-  logging.info(f'Checking for substrings that occur equally.')
-  for key in groups.keys():
-    logging.info(f'Checking group with frequency {key}.')
-    group = groups[key]
-    for i in range(len(group)):
-      for j in range(len(group)):
-        if i != j and is_included(group[i], group[j]):
-          logging.info(
-            f'Remove "{group[i]}". It is a substring of "{group[j]}".'
-          )
-          if group[i] not in remove:
-            remove.append(group[i])
-            json.dump(remove, open(remove_file, 'w'))
-          break
-  logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
-  logging.info(f'Checking for substrings that occur once more.')
-  for i in groups.keys():
-    logging.info(f'Checking group with frequency {key}.')
-    if i+1 in groups.keys():
-      logging.info(f'A group with frequency {i+1} exists.')
-      for entry in groups[i+1]:
-        for other_entry in groups[i]:
-          if is_included(entry, other_entry):
+    for key in self.groups.keys():
+      logging.info(f'Checking group with frequency {key}.')
+      group = self.groups[key]
+      for i in range(len(group)):
+        for j in range(len(group)):
+          if i != j and is_included(group[i], group[j]):
             logging.info(
-              f'Remove "{entry}". It is a substring of "{other_entry}".'
+              f'Remove "{group[i]}". It occurs as often as "{group[j]}".'
             )
-          if group[i] not in remove:
             remove.append(group[i])
-            json.dump(remove, open(remove_file, 'w'))
-          break
-    else:
-      logging.info(f'There is no group with frequency {i+1}.')
-  logging.info(f'Vocab size is now {len(filtered) - len(remove)}.')
-  for entry in remove:
-    filtered.pop(entry)
-  return filtered
+            break
+    self.dump(remove, '_step_2_removed')
+    for entry in remove:
+      del self.vocab[entry]
+    logging.info(f'Vocab size is now {len(self.vocab)}.')
+  
+  def step_3(self):
+    """ Remove entries that occur once more than larger ones that contain them
+    by using 'self.groups', where the entries are grouped by frequency. Store
+    the removed words. """
+    logging.info(f'Checking for substrings that occur once more.')
+    remove = []
+    for i in self.groups.keys():
+      logging.info(f'Checking group with frequency {i}.')
+      if i+1 in self.groups.keys():
+        logging.info(f'A group with frequency {i+1} exists.')
+        for entry in self.groups[i+1]:
+          for other_entry in self.groups[i]:
+            if is_included(entry, other_entry):
+              logging.info(
+                f'Remove "{entry}". It occurs once more than "{other_entry}".'
+              )
+              remove.append(entry)
+              break
+      else:
+        logging.info(f'There is no group with frequency {i+1}.')
+    self.dump(remove, '_step_3_removed')
+    for entry in remove:
+      del self.vocab[entry]
+    logging.info(f'Vocab size is now {len(self.vocab)}.')
 
 
 def is_included(included, includes):
@@ -111,27 +138,7 @@ def is_included(included, includes):
   return False
 
 
-def main_filter(vocab_file):
-  start = int(time())
-  logging.basicConfig(
-    filename=f"logs/filter_vocab_{start}.log",
-    format='%(asctime)s %(message)s',
-    level=logging.INFO
-  )
-  logging.info(f'Starting to filter vocab "{vocab_file}".')
-  filtered = filter_vocab(vocab_file)
-  logging.info('Filtering completed.')
-  filtered_file = f'{vocab_file[:-5]}_filtered.json'
-  json.dump(filtered, open(filtered_file, 'w'))
-  logging.info(f'Filtered vocab dumped to "{filtered_file}"')
-
-
-def test_filter():
-  """ Test the filtering procedure with the test vocabulary. """
-  vocab_file = 'data/vocab/test_vocab.json'
-  main_filter(vocab_file)
-
-
 if __name__ == "__main__":
-  # main_filter('data/vocab/repo_vocab_1.json')
-  test_filter()
+  filename = 'data/vocab/repo_vocab.json'
+  filename_test = 'data/vocab/test_vocab.json'
+  filterer = VocabFilterer(filename_test)
