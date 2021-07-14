@@ -17,7 +17,6 @@ terms of strings. The latter would remove 'selling' because it matches with
 
 
 import json
-import os
 import logging
 from time import time
 
@@ -40,13 +39,10 @@ class VocabFilterer:
     also the removed entries in each step. """
     logging.info(f'Starting to filter vocab "{self.root_name}".')
     logging.info(f'Starting size of the vocab: {len(self.vocab)}')
-    self.vocab = self.step_1(bottom, top)
-    self.dump(self.vocab, '_step_1')
-    self.vocab = self.step_2()
+    self.step_1(bottom, top)
     self.groups = self.create_groups()
-    self.dump(self.vocab, '_step_2')
-    self.vocab = self.step_3()
-    self.dump(self.vocab, '_step_3')
+    self.step_2()
+    self.step_3()
     # self.vocab = self.step_4()
     # self.dump(self.vocab, '_filtered')
   
@@ -54,17 +50,18 @@ class VocabFilterer:
     """ Remove entries that occur 'bottom' or less times and entries that occur
     'top' or more times. Store those entries as a dictionary with two keys
     '{bottom}_or_less' and '{top}_or_more'. """
-    self.vocab = {
-      k: v for k, v in self.vocab.items() if v > bottom and v < top
-    }
-    logging.info(f'Vocab size after removing extrema: {len(self.vocab)}.')
     removed = {
       f'{bottom}_or_less': [k for k, v in self.vocab.items() if v <= bottom],
       f'{top}_or_more': [k for k, v in self.vocab.items() if v >= top]
     }
+    self.vocab = {
+      k: v for k, v in self.vocab.items() if v > bottom and v < top
+    }
+    logging.info(f'Vocab size after removing extrema: {len(self.vocab)}.')
     logging.info(f'Bottom extrema: {len(removed[f"{bottom}_or_less"])}.')
     logging.info(f'Top extrema: {len(removed[f"{top}_or_more"])}.')
     self.dump(removed, '_step_1_removed.json')
+    self.dump(self.vocab, '_step_1')
   
   def create_groups(self):
     """ Group the entries of the vocabulary by frequency. Return a dict
@@ -99,6 +96,7 @@ class VocabFilterer:
     for entry in remove:
       del self.vocab[entry]
     logging.info(f'Vocab size is now {len(self.vocab)}.')
+    self.dump(self.vocab, '_step_2')
   
   def step_3(self):
     """ Remove entries that occur once more than larger ones that contain them
@@ -124,14 +122,19 @@ class VocabFilterer:
     for entry in remove:
       del self.vocab[entry]
     logging.info(f'Vocab size is now {len(self.vocab)}.')
+    self.dump(self.vocab, '_step_3')
   
   def step_4(self):
-    pass
+    """ Remove entries that either never occur alone or only once. 
+    """
 
   def dump(self, obj, appendix):
     """ Dump the JSON object 'obj' with the root name plus the appendix
     as the name."""
-    json.dump(obj, open(f'{self.root_name}{appendix}.json', 'w'))
+    json.dump(
+      obj, 
+      open(f'{self.root_name}{appendix}.json', 'w', encoding='utf-8')
+    )
 
 
 def is_included(included, includes):
