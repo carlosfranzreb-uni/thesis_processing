@@ -147,3 +147,4 @@ if __name__ == "__main__":
   filename = 'data/vocab/repo_vocab.json'
   filename_test = 'data/vocab/test_vocab.json'
   filterer = VocabFilterer(filename)
+  filterer.filter()
