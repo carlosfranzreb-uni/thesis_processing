@@ -128,6 +128,11 @@ class VocabFilterer:
   def step_4(self):
     pass
 
+  def dump(self, obj, appendix):
+    """ Dump the JSON object 'obj' with the root name plus the appendix
+    as the name."""
+    json.dump(obj, open(f'{self.root_name}{appendix}.json', 'w'))
+
 
 def is_included(included, includes):
   """ Return True if the string 'included' is an n-gram that is part of
