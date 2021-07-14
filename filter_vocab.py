@@ -40,7 +40,6 @@ class VocabFilterer:
     logging.info(f'Starting to filter vocab "{self.root_name}".')
     logging.info(f'Starting size of the vocab: {len(self.vocab)}')
     self.step_1(bottom, top)
-    self.groups = self.create_groups()
     self.step_2()
     self.step_3()
     # self.vocab = self.step_4()
@@ -72,25 +71,27 @@ class VocabFilterer:
         groups[freq].append(entry)
       else:
         groups[freq] = [entry]
-    logging.info(f'Entries grouped by frequency. There are {len(groups)} groups.')
+    logging.info(
+      f'Entries grouped by frequency. There are {len(groups)} groups.'
+    )
     return groups
 
   def step_2(self):
     """ Remove entries that occur as often as larger ones that contain them by
-    using 'self.groups', where the entries are grouped by frequency. Store
+    using 'groups', where the entries are grouped by frequency. Store
     the removed words."""
     logging.info(f'Checking for substrings that occur equally.')
     remove = []
-    for key in self.groups.keys():
+    groups = self.create_groups()
+    for key in groups.keys():
       logging.info(f'Checking group with frequency {key}.')
-      group = self.groups[key]
-      for i in range(len(group)):
-        for j in range(len(group)):
-          if i != j and is_included(group[i], group[j]):
+      for i in range(len(groups[key])):
+        for j in range(len(groups[key])):
+          if i != j and is_included(groups[key][i], groups[key][j]):
             logging.info(
-              f'Remove "{group[i]}". It occurs as often as "{group[j]}".'
+              f'Remove "{groups[key][i]}". It occurs as often as "{groups[key][j]}".'
             )
-            remove.append(group[i])
+            remove.append(groups[key][i])
             break
     self.remove_entries(remove)
     self.dump(remove, '_step_2_removed')
@@ -98,16 +99,17 @@ class VocabFilterer:
   
   def step_3(self):
     """ Remove entries that occur once more than larger ones that contain them
-    by using 'self.groups', where the entries are grouped by frequency. Store
+    by using 'groups', where the entries are grouped by frequency. Store
     the removed words. """
     logging.info(f'Checking for substrings that occur once more.')
     remove = []
-    for i in self.groups.keys():
+    groups = self.create_groups()
+    for i in groups.keys():
       logging.info(f'Checking group with frequency {i}.')
-      if i+1 in self.groups.keys():
+      if i+1 in groups.keys():
         logging.info(f'A group with frequency {i+1} exists.')
-        for entry in self.groups[i+1]:
-          for other_entry in self.groups[i]:
+        for entry in groups[i+1]:
+          for other_entry in groups[i]:
             if is_included(entry, other_entry):
               logging.info(
                 f'Remove "{entry}". It occurs once more than "{other_entry}".'
@@ -131,7 +133,7 @@ class VocabFilterer:
       for other_entry, other_freq in self.vocab.items():
         if is_included(entry, other_entry):
           included_sum += other_freq
-          if included_sum == freq or included_sum+1 == freq:
+          if included_sum + 1 >= freq:
             remove.append(entry)
             break
     self.remove_entries(remove)
@@ -170,5 +172,5 @@ def is_included(included, includes):
 if __name__ == "__main__":
   filename = 'data/vocab/repo_vocab.json'
   filename_test = 'data/vocab/test_vocab.json'
-  filterer = VocabFilterer(filename)
+  filterer = VocabFilterer(filename_test)
   filterer.filter()
