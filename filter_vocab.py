@@ -42,8 +42,7 @@ class VocabFilterer:
     self.step_1(bottom, top)
     self.step_2()
     self.step_3()
-    # self.vocab = self.step_4()
-    # self.dump(self.vocab, '_filtered')
+    self.vocab = self.step_4()
   
   def step_1(self, bottom, top):
     """ Remove entries that occur 'bottom' or less times and entries that occur
