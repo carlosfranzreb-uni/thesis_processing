@@ -47,8 +47,8 @@ class VocabFilterer:
     self.dump(self.vocab, '_step_2')
     self.vocab = self.step_3()
     self.dump(self.vocab, '_step_3')
-    self.vocab = self.step_4()
-    self.dump(self.vocab, '_filtered')
+    # self.vocab = self.step_4()
+    # self.dump(self.vocab, '_filtered')
   
   def step_1(self, bottom, top):
     """ Remove entries that occur 'bottom' or less times and entries that occur
@@ -146,4 +146,4 @@ def is_included(included, includes):
 if __name__ == "__main__":
   filename = 'data/vocab/repo_vocab.json'
   filename_test = 'data/vocab/test_vocab.json'
-  filterer = VocabFilterer(filename_test)
+  filterer = VocabFilterer(filename)
