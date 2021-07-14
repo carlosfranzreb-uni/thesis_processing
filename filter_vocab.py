@@ -92,10 +92,8 @@ class VocabFilterer:
             )
             remove.append(group[i])
             break
+    self.remove_entries(remove)
     self.dump(remove, '_step_2_removed')
-    for entry in remove:
-      del self.vocab[entry]
-    logging.info(f'Vocab size is now {len(self.vocab)}.')
     self.dump(self.vocab, '_step_2')
   
   def step_3(self):
@@ -118,15 +116,33 @@ class VocabFilterer:
               break
       else:
         logging.info(f'There is no group with frequency {i+1}.')
+    self.remove_entries(remove)
     self.dump(remove, '_step_3_removed')
-    for entry in remove:
-      del self.vocab[entry]
-    logging.info(f'Vocab size is now {len(self.vocab)}.')
     self.dump(self.vocab, '_step_3')
   
   def step_4(self):
-    """ Remove entries that either never occur alone or only once. 
-    """
+    """ Remove entries that either never occur alone or only once. For each
+    entry, find all the entries that include it. If the sum of their frequences
+    equals the frequency of the entry or is off by one (i.e. one less), remove
+    the entry. """
+    remove = []
+    for entry, freq in self.vocab.items():
+      included_sum = 0
+      for other_entry, other_freq in self.vocab.items():
+        if is_included(entry, other_entry):
+          included_sum += other_freq
+          if included_sum == freq or included_sum+1 == freq:
+            remove.append(entry)
+            break
+    self.remove_entries(remove)
+    self.dump(remove, '_step_4')
+    self.dump(self.vocab, '_final')
+    
+  def remove_entries(self, remove):
+    """ Remove the entries present in the list 'remove' from the vocab. """
+    for entry in remove:
+      del self.vocab[entry]
+    logging.info(f'Vocab size is now {len(self.vocab)}.')
 
   def dump(self, obj, appendix):
     """ Dump the JSON object 'obj' with the root name plus the appendix
