@@ -19,6 +19,7 @@ terms of strings. The latter would remove 'selling' because it matches with
 import json
 import logging
 from time import time
+from multiprocessing import Pool
 
 
 class VocabFilterer:
@@ -70,10 +71,12 @@ class VocabFilterer:
     groups = self.create_groups()
     for key in groups.keys():
       logging.info(f'Checking group with frequency {key}.')
-      for i in range(len(groups[key])):
-        self.substring_of_group(groups[key][i], remove(groups[key], i))
-    self.remove_entries(self.remove, 2)
-    self.remove = []
+      with Pool() as p:
+        self.remove += p.starmap(self.substring_of_group, [
+          (groups[key][i], remove(groups[key], i))
+          for i in range(len(groups[key]))
+        ])
+    self.remove_entries(2)
   
   def step_3(self):
     """ Remove entries that occur once more than larger ones that contain them
@@ -85,27 +88,22 @@ class VocabFilterer:
       logging.info(f'Checking group with frequency {i}.')
       if i+1 in groups.keys():
         logging.info(f'A group with frequency {i+1} exists.')
-        for entry in groups[i+1]:
-          self.substring_of_group(entry, groups[i])
+        with Pool() as p:
+          self.remove += p.starmap(self.substring_of_group, [
+            (e, groups[i]) for e in groups[i+1]
+          ])
       else:
         logging.info(f'There is no group with frequency {i+1}.')
-    self.remove_entries(self.remove, 3)
-  
+    self.remove_entries(3)
+
   def step_4(self):
     """ Remove entries that either never occur alone or only once. For each
     entry, find all the entries that include it. If the sum of their frequences
     equals the frequency of the entry or is off by one (i.e. one less), remove
     the entry. """
-    remove = []
-    for entry, freq in self.vocab.items():
-      included_sum = 0
-      for other_entry, other_freq in self.vocab.items():
-        if is_included(entry, other_entry):
-          included_sum += other_freq
-          if included_sum + 1 >= freq:
-            remove.append(entry)
-            break
-    self.remove_entries(remove, 4)
+    with Pool() as p:
+      self.remove += p.starmap(self.substring_of_more, self.vocab.items())
+    self.remove_entries(4)
 
   def create_groups(self):
     """ Group the entries of the vocabulary by frequency. Return a dict
@@ -129,17 +127,32 @@ class VocabFilterer:
         logging.info(
           f'Remove "{entry}". It occurs as often as "{other_entry}".'
         )
-        self.remove.append(entry)
-        return   
-    
-  def remove_entries(self, remove, step_nr):
-    """ Remove the entries present in the list 'remove' from the vocab. Store
-    the removed entries and the resulting vocab with the given step_nr. """
-    for entry in remove:
-      del self.vocab[entry]
+        return entry
+    return None
+  
+  def substring_of_more(self, entry, freq):
+    """ Add the frequencies of the entries of which 'entry' is a substring.
+    If the sum equals the frequency of 'entry' or is one less, add 'entry' to
+    'self.remove' """
+    included_sum = 0
+    for other_entry, other_freq in self.vocab.items():
+      if entry != other_entry and is_included(entry, other_entry):
+        included_sum += other_freq
+        if included_sum + 1 >= freq:
+          return entry
+    return None
+
+  def remove_entries(self, step_nr):
+    """ Remove the entries present in the list 'self.remove' from the vocab.
+    Store the removed entries and the resulting vocab with the given step_nr.
+    Empty the self.remove array at the end."""
+    for entry in self.remove:
+      if entry is not None:
+        del self.vocab[entry]
     logging.info(f'Vocab size is now {len(self.vocab)}.')
-    self.dump(remove, f'_step_{step_nr}_removed')
+    self.dump(self.remove, f'_step_{step_nr}_removed')
     self.dump(self.vocab, f'_step_{step_nr}')
+    self.remove = []
 
   def dump(self, obj, appendix):
     """ Dump the JSON object 'obj' with the root name plus the appendix
