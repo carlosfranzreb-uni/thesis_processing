@@ -60,7 +60,7 @@ class VocabFilterer:
     logging.info(f'Vocab size after removing extrema: {len(self.vocab)}.')
     logging.info(f'Bottom extrema: {len(removed[f"{bottom}_or_less"])}.')
     logging.info(f'Top extrema: {len(removed[f"{top}_or_more"])}.')
-    self.dump(removed, '_step_1_removed.json')
+    self.dump(removed, '_step_1_removed')
     self.dump(self.vocab, '_step_1')
 
   def step_2(self):
