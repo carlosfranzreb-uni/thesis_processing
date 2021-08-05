@@ -20,10 +20,11 @@ import json
 import logging
 from time import time
 from multiprocessing import Pool
+from sys import getsizeof
 
 
 class VocabFilterer:
-  def __init__(self, vocab_file):
+  def __init__(self, vocab_file, bottom=1, top=1000):
     logging.basicConfig(
       filename=f"logs/filter_vocab_{int(time())}.log",
       format='%(asctime)s %(message)s',
@@ -32,8 +33,10 @@ class VocabFilterer:
     self.root_name = vocab_file[:-5]
     self.vocab = json.load(open(vocab_file))
     self.remove = []  # stores the entries to be removed in each step.
+    self.bottom = bottom
+    self.top = top
 
-  def filter(self, bottom=1, top=1000):
+  def filter(self):
     """ Dump a filtered vocabulary starting with the one in 'vocab_file' by
     executing the four steps explained in the docstring. Each is performed by a
     different function. After each step, an intermediate result is saved, named
@@ -41,25 +44,27 @@ class VocabFilterer:
     also the removed entries in each step. """
     logging.info(f'Starting to filter vocab "{self.root_name}".')
     logging.info(f'Starting size of the vocab: {len(self.vocab)}')
-    self.step_1(bottom, top)
+    self.step_1()
     self.step_2()
     self.step_3()
     self.vocab = self.step_4()
   
-  def step_1(self, bottom, top):
+  def step_1(self):
     """ Remove entries that occur 'bottom' or less times and entries that occur
     'top' or more times. Store those entries as a dictionary with two keys
     '{bottom}_or_less' and '{top}_or_more'. """
     removed = {
-      f'{bottom}_or_less': [k for k, v in self.vocab.items() if v <= bottom],
-      f'{top}_or_more': [k for k, v in self.vocab.items() if v >= top]
+      f'{self.bottom}_or_less': [
+        k for k, v in self.vocab.items() if v <= self.bottom
+      ],
+      f'{self.top}_or_more': [k for k, v in self.vocab.items() if v >= self.top]
     }
     self.vocab = {
-      k: v for k, v in self.vocab.items() if v > bottom and v < top
+      k: v for k, v in self.vocab.items() if v > self.bottom and v < self.top
     }
     logging.info(f'Vocab size after removing extrema: {len(self.vocab)}.')
-    logging.info(f'Bottom extrema: {len(removed[f"{bottom}_or_less"])}.')
-    logging.info(f'Top extrema: {len(removed[f"{top}_or_more"])}.')
+    logging.info(f'Bottom extrema: {len(removed[f"{self.bottom}_or_less"])}.')
+    logging.info(f'Top extrema: {len(removed[f"{self.top}_or_more"])}.')
     self.dump(removed, '_step_1_removed')
     self.dump(self.vocab, '_step_1')
 
@@ -68,41 +73,30 @@ class VocabFilterer:
     using 'groups', where the entries are grouped by frequency. Store
     the removed words."""
     logging.info(f'Checking for substrings that occur equally.')
-    groups = self.create_groups()
-    for key in groups.keys():
-      logging.info(f'Checking group with frequency {key}.')
-      with Pool() as p:
-        self.remove += p.starmap(self.substring_of_group, [
-          (groups[key][i], remove(groups[key], i))
-          for i in range(len(groups[key]))
-        ])
-    self.remove_entries(2)
+    for freq in range(self.bottom+1, self.top):
+      logging.info(f'Checking entries with frequency {freq}.')
+      for entry in self.iter_group(freq):
+        self.remove += self.substring_of_group(entry, freq)
+      self.remove_entries(2)
   
   def step_3(self):
     """ Remove entries that occur once more than larger ones that contain them
     by using 'groups', where the entries are grouped by frequency. Store
     the removed words. """
     logging.info(f'Checking for substrings that occur once more.')
-    groups = self.create_groups()
-    for i in groups.keys():
-      logging.info(f'Checking group with frequency {i}.')
-      if i+1 in groups.keys():
-        logging.info(f'A group with frequency {i+1} exists.')
-        with Pool() as p:
-          self.remove += p.starmap(self.substring_of_group, [
-            (e, groups[i]) for e in groups[i+1]
-          ])
-      else:
-        logging.info(f'There is no group with frequency {i+1}.')
-    self.remove_entries(3)
+    for freq in range(self.bottom+1, self.top-1):
+      logging.info(f'Checking entries with frequency {freq}.')
+      for entry in self.iter_group(freq):
+        self.remove += self.substring_of_group(entry, freq+1)
+      self.remove_entries(3)
 
   def step_4(self):
     """ Remove entries that either never occur alone or only once. For each
     entry, find all the entries that include it. If the sum of their frequences
     equals the frequency of the entry or is off by one (i.e. one less), remove
     the entry. """
-    with Pool() as p:
-      self.remove += p.starmap(self.substring_of_more, self.vocab.items())
+    for entry, freq in self.vocab.items():
+      self.remove += self.substring_of_more(entry, freq)
     self.remove_entries(4)
 
   def create_groups(self):
@@ -118,17 +112,23 @@ class VocabFilterer:
       f'Entries grouped by frequency. There are {len(groups)} groups.'
     )
     return groups
+  
+  def iter_group(self, freq):
+    """ Lazily iterate over the entries with the given frequency. """
+    for entry, this_freq in self.vocab.items():
+      if this_freq == freq:
+        yield entry
 
-  def substring_of_group(self, entry, group):
+  def substring_of_group(self, entry, freq):
     """ If the entry is contained in the given group, add it to
     self.remove. """
-    for other_entry in group:
+    for other_entry in self.iter_group(freq):
       if is_included(entry, other_entry):
         logging.info(
-          f'Remove "{entry}". It occurs as often as "{other_entry}".'
+          f'Remove "{entry}". It is included in "{other_entry}".'
         )
-        return entry
-    return None
+        return [entry]
+    return []
   
   def substring_of_more(self, entry, freq):
     """ Add the frequencies of the entries of which 'entry' is a substring.
@@ -139,8 +139,8 @@ class VocabFilterer:
       if entry != other_entry and is_included(entry, other_entry):
         included_sum += other_freq
         if included_sum + 1 >= freq:
-          return entry
-    return None
+          return [entry]
+    return []
 
   def remove_entries(self, step_nr):
     """ Remove the entries present in the list 'self.remove' from the vocab.
