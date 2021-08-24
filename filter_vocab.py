@@ -87,7 +87,7 @@ class VocabFilterer:
     for freq in range(self.bottom+1, self.top-1):
       logging.info(f'Checking entries with frequency {freq}.')
       for entry in self.iter_group(freq):
-        self.remove += self.substring_of_group(entry, freq+1)
+        self.remove += self.substring_of_group(entry, freq-1)
       self.remove_entries(3)
 
   def step_4(self):
