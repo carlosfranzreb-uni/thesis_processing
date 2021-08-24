@@ -189,10 +189,10 @@ def remove(arr, idx):
 
 
 if __name__ == "__main__":
-  filename = 'data/vocab/repo_vocab.json'
+  filename = 'data/vocab/repo_vocab_step_4.json'
   filename_test = 'data/vocab/test/test_vocab.json'
   filterer = VocabFilterer(filename)
   try:
-    filterer.filter()
+    filterer.step_3()
   except Exception as exc:
     logging.error(exc)
