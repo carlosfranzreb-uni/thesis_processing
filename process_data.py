@@ -35,11 +35,16 @@ class DataProcessor:
       Sentence(text, use_tokenizer=self.tokenizer),
       self.tagger, self.lemmatizer
     )
-    indexed_tokens = {w: idx for idx, w in enumerate(tokens)}
+    indexed_tokens = {}
+    for idx, w in enumerate(tokens):
+      if w not in indexed_tokens:
+        indexed_tokens[w] = []
+      indexed_tokens[w].append(idx) 
     filtered_tokens = filter(tokens)
     res = dict()
     for filtered_token in filtered_tokens:
-      res[filtered_token] = indexed_tokens[filtered_token]
+      if filtered_token not in res:
+        res[filtered_token] = indexed_tokens[filtered_token]
     return res
 
 
