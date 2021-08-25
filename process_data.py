@@ -49,4 +49,4 @@ if __name__ == '__main__':
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
-  processor.process_data(data, 'data/json/dim/all/data_processed.json')
+  processor.process_data(data, 'data/json/dim/all/data_processed_pos.json')
