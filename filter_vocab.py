@@ -92,7 +92,7 @@ class VocabFilterer:
 
   def step_4(self):
     """ Remove entries that either never occur alone or only once. For each
-    entry, find all the entries that include it. If the sum of their frequences
+    entry, find all the entries that include it. If the sum of their frequencies
     equals the frequency of the entry or is off by one (i.e. one less), remove
     the entry. """
     for entry, freq in self.vocab.items():
