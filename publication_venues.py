@@ -50,12 +50,13 @@ def get_venue(id, publication_type, repo):
   for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
     if 'qualifier' in f.attrib and f.attrib['qualifier'] == qualifier:
       return f.text
+  for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
+    if 'element' in f.attrib and f.attrib['element'] == 'series':
+      if 'qualifier' in f.attrib and f.attrib['qualifier'] == 'name':
+        return f.text
   if repo == 'depositonce':
     for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
-      if 'element' in f.attrib and f.attrib['element'] == 'series':
-        if 'qualifier' in f.attrib and f.attrib['qualifier'] == 'name':
-          return f.text
-      elif 'element' in f.attrib and \
+      if 'element' in f.attrib and \
           f.attrib['element'] == 'bibliograhicCitation':
         if 'qualifier' in f.attrib and f.attrib['qualifier'] == 'journaltitle':
           return f.text
