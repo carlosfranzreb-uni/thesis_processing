@@ -138,5 +138,14 @@ def compute_frequency(relevant, field_name, field_type):
   json.dump(doc_types, open(f'data/json/dim/all/{field_name}.json', 'w'))
 
 
+def test_venues():
+  ids = ['oai:refubium.fu-berlin.de:fub188/18598', 'oai:refubium.fu-berlin.de:fub188/19810']
+  mapping = dict()
+  repo = 'test'
+  for id in ids:
+    mapping[id] = get_venue(id, 'article', repo)
+  print(mapping)
+
+
 if __name__ == "__main__":
   get_venues()
