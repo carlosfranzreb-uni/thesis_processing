@@ -54,6 +54,8 @@ def get_venue(id, publication_type, repo):
     if 'element' in f.attrib and f.attrib['element'] == 'series':
       if 'qualifier' in f.attrib and f.attrib['qualifier'] == 'name':
         return f.text
+    elif 'qualifier' in f.attrib and f.attrib['qualifier'] == 'container-erstkat-id':
+      return f.text
   if repo == 'depositonce':
     for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
       if 'element' in f.attrib and \
