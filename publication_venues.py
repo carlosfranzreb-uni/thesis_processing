@@ -58,14 +58,14 @@ def get_venue(id, publication_type, repo):
       return f.text
   if repo == 'depositonce':
     for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
-      if 'element' in f.attrib and \
-          f.attrib['element'] == 'bibliograhicCitation':
+      if 'element' in f.attrib and f.attrib['element'] == 'bibliograhicCitation':
         if 'qualifier' in f.attrib and f.attrib['qualifier'] == 'journaltitle':
           return f.text
   elif repo == 'refubium':
     for f in metadata.find(f'{dim}dim').findall(f'{dim}field'):
       if 'element' in f.attrib and f.attrib['element'] == 'bibliographicCitation':
-        return f.text.split('.')[0]  
+        return f.text.split('.')[0]
+  return None
 
 
 def get_venues():
@@ -77,6 +77,7 @@ def get_venues():
     for id, doc_type in relevant_types.items():
       if 'thesis' not in doc_type:
         mapping[id] = get_venue(id, doc_type, repo)
+        print(id, mapping[id])
   json.dump(mapping, open(f'data/json/dim/all/relevant_venues.json', 'w'))
 
 
