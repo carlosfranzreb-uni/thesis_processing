@@ -78,7 +78,7 @@ def get_venues():
       if 'thesis' not in doc_type:
         mapping[id] = get_venue(id, doc_type, repo)
         print(id, mapping[id])
-  json.dump(mapping, open(f'data/json/dim/all/relevant_venues.json', 'w'))
+  json.dump(mapping, open(f'data/json/dim/all/relevant_venues_v2.json', 'w'))
 
 
 def discover_fields():
