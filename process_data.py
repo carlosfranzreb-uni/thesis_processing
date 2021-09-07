@@ -20,14 +20,15 @@ class DataProcessor:
     self.tagger = tagger
     self.lemmatizer = lemmatizer
 
-  def process_data(self, data, dump_file):
+  def process_data(self, data, func, dump_file):
     processed = {}
     for id, metadata in data.items():
       processed[id] = {}
-      if metadata['title'] is not None:
-        processed[id]['title'] = self.process_text(metadata['title'])
-      if metadata['abstract'] is not None:
-        processed[id]['abstract'] = self.process_text(metadata['abstract'])
+      for text in ('title', 'abstract'):
+        if metadata[text] is not None:
+          processed[id][text] = func(metadata[text])
+        else:
+          processed[id][text] = None
     json.dump(processed, open(dump_file, 'w'))
 
   def process_text(self, text):
@@ -36,6 +37,10 @@ class DataProcessor:
       self.tagger, self.lemmatizer
     )
 
+  def tokenize_text(self, text):
+    tokens = Sentence(text, use_tokenizer=self.tokenizer)
+    return [token.text for token in tokens]
+
 
 if __name__ == '__main__':
   data = json.load(open('data/json/dim/all/relevant_data.json'))
@@ -43,4 +48,4 @@ if __name__ == '__main__':
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
-  processor.process_data(data, 'data/json/dim/all/data_processed.json')
+  processor.process_data(data, processor.tokenize_text, 'data/json/dim/all/data_processed_tokens.json')
