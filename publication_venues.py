@@ -35,14 +35,12 @@ def get_venue(id, publication_type, repo):
   if repo == 'edoc':
     qualifier = 'container-title'
   else:
-    if publication_type == 'article':
-      qualifier = 'journaltitle'
-    elif publication_type == 'bookpart':
+    if publication_type == 'bookpart':
       qualifier = 'booktitle'
     elif publication_type in ('conferenceobject', 'conferenceproceedings'):
       qualifier = 'proceedingstitle'
     else:
-      return None
+      qualifier = 'journaltitle'
   record = get_record(id, repo)
   metadata = record.find(f'{oai}metadata')
   if metadata is None:
@@ -72,10 +70,12 @@ def get_venues():
   """ Return a mapping of IDs to venues. 'relevant_types' is a mapping of IDs
   to publication types. Theses don't have venues and are thus not included. """
   mapping = dict()
-  for repo in ['depositonce', 'edoc', 'refubium']:
+  for repo in ['refubium']:  # ['depossitonce', 'edoc', 'refubium']:
     relevant_types = json.load(open(f'data/json/dim/{repo}/relevant_types.json'))
     for id, doc_type in relevant_types.items():
       if 'thesis' not in doc_type:
+        if '18598' in id:
+          print('here!')
         mapping[id] = get_venue(id, doc_type, repo)
         print(id, mapping[id])
   json.dump(mapping, open(f'data/json/dim/all/relevant_venues_v2.json', 'w'))
