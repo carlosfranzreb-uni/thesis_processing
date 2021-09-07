@@ -31,21 +31,10 @@ class DataProcessor:
     json.dump(processed, open(dump_file, 'w'))
 
   def process_text(self, text):
-    tokens = process(
+    return process(
       Sentence(text, use_tokenizer=self.tokenizer),
       self.tagger, self.lemmatizer
     )
-    indexed_tokens = {}
-    for idx, w in enumerate(tokens):
-      if w not in indexed_tokens:
-        indexed_tokens[w] = []
-      indexed_tokens[w].append(idx) 
-    filtered_tokens = filter(tokens)
-    res = dict()
-    for filtered_token in filtered_tokens:
-      if filtered_token not in res:
-        res[filtered_token] = indexed_tokens[filtered_token]
-    return res
 
 
 if __name__ == '__main__':
@@ -54,4 +43,4 @@ if __name__ == '__main__':
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
-  processor.process_data(data, 'data/json/dim/all/data_processed_pos.json')
+  processor.process_data(data, 'data/json/dim/all/data_processed.json')
