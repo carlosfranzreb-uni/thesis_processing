@@ -74,10 +74,7 @@ def get_venues():
     relevant_types = json.load(open(f'data/json/dim/{repo}/relevant_types.json'))
     for id, doc_type in relevant_types.items():
       if 'thesis' not in doc_type:
-        if '18598' in id:
-          print('here!')
         mapping[id] = get_venue(id, doc_type, repo)
-        print(id, mapping[id])
   json.dump(mapping, open(f'data/json/dim/all/relevant_venues_v2.json', 'w'))
 
 
