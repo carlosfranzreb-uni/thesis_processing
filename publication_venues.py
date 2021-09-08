@@ -70,7 +70,7 @@ def get_venues():
   """ Return a mapping of IDs to venues. 'relevant_types' is a mapping of IDs
   to publication types. Theses don't have venues and are thus not included. """
   mapping = dict()
-  for repo in ['depossitonce', 'edoc', 'refubium']:
+  for repo in ['depositonce', 'edoc', 'refubium']:
     relevant_types = json.load(open(f'data/json/dim/{repo}/relevant_types.json'))
     for id, doc_type in relevant_types.items():
       if 'thesis' not in doc_type:
