@@ -48,4 +48,5 @@ def create_ert(publications, data, sample_size=4):
 
 
 if __name__ == "__main__":
+  get_publications()
   get_erts()
