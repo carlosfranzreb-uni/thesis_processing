@@ -17,18 +17,16 @@ def get_publications():
     if venue not in publications:
       publications[venue] = []
     publications[venue].append(publication_id)
-  json.dump(
-    publications, open('../data/json/dim/all/ert/venue_publications.json', 'w')
-  )
+  json.dump(publications, open('../data/json/dim/all/ert/referees.json', 'w'))
 
 
 def get_erts():
   """ For each venue in 'venue_publications' (the file created by
   get_publications()), call create_ert(). Dump the results in a file. """
-  publications = json.load(open('../data/json/dim/all/venue_publications.json'))
+  publications = json.load(open('../data/json/dim/all/ert/referees.json'))
   data = json.load(open('../data/json/dim/all/relevant_data.json'))
-  erts = {venue: create_ert(ids, data) for venue, ids in publications.items()}
-  json.dump(erts, open('../data/json/dim/all/ert/venue_erts.json', 'w'))
+  erts = {referee: create_ert(ids, data) for referee, ids in publications.items()}
+  json.dump(erts, open('../data/json/dim/all/ert/referee_erts.json', 'w'))
 
 
 def create_ert(publications, data, sample_size=4):

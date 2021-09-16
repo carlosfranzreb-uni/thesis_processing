@@ -29,7 +29,7 @@ def get_erts():
   create_ert(). Dump the results in a file. """
   advisors = json.load(open('../data/json/dim/all/advisors.json'))
   data = json.load(open('../data/json/dim/all/relevant_data.json'))
-  erts = {advisors: create_ert(ids, data) for advisors, ids in advisors.items()}
+  erts = {advisor: create_ert(ids, data) for advisor, ids in advisors.items()}
   json.dump(erts, open('../data/json/dim/all/ert/advisor_erts.json', 'w'))
 
 
