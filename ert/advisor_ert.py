@@ -21,7 +21,7 @@ def get_advisors():
             if contributor[0] not in advisors:
               advisors[contributor[0]] = []
             advisors[contributor[0]].append(doc['id'])
-  json.dump(advisors, open('../data/json/dim/all/advisors.json', 'w'))
+  json.dump(advisors, open('../data/json/dim/all/ert/advisors.json', 'w'))
 
 
 def get_erts():
@@ -30,7 +30,7 @@ def get_erts():
   advisors = json.load(open('../data/json/dim/all/advisors.json'))
   data = json.load(open('../data/json/dim/all/relevant_data.json'))
   erts = {advisors: create_ert(ids, data) for advisors, ids in advisors.items()}
-  json.dump(erts, open('../data/json/dim/all/advisor_erts.json', 'w'))
+  json.dump(erts, open('../data/json/dim/all/ert/advisor_erts.json', 'w'))
 
 
 def create_ert(theses, data, sample_size=4):

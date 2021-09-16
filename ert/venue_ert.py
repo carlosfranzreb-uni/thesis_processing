@@ -17,7 +17,9 @@ def get_publications():
     if venue not in publications:
       publications[venue] = []
     publications[venue].append(publication_id)
-  json.dump(publications, open('../data/json/dim/all/venue_publications.json', 'w'))
+  json.dump(
+    publications, open('../data/json/dim/all/ert/venue_publications.json', 'w')
+  )
 
 
 def get_erts():
@@ -26,7 +28,7 @@ def get_erts():
   publications = json.load(open('../data/json/dim/all/venue_publications.json'))
   data = json.load(open('../data/json/dim/all/relevant_data.json'))
   erts = {venue: create_ert(ids, data) for venue, ids in publications.items()}
-  json.dump(erts, open('../data/json/dim/all/venue_erts.json', 'w'))
+  json.dump(erts, open('../data/json/dim/all/ert/venue_erts.json', 'w'))
 
 
 def create_ert(publications, data, sample_size=4):
