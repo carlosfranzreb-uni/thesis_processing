@@ -8,16 +8,16 @@ import json
 from random import sample
 
 
-def get_publications():
+def get_referees():
   """ For each venue found in 'json/dim/all/relevant_venues.json', gather all
-  the publications that belong to it and dump them in a file. """
+  the referees that belong to it and dump them in a file. """
   venues = json.load(open('../data/json/dim/all/relevant_venues.json'))
-  publications = {}
+  referees = {}
   for publication_id, venue in venues.items():
-    if venue not in publications:
-      publications[venue] = []
-    publications[venue].append(publication_id)
-  json.dump(publications, open('../data/json/dim/all/ert/referees.json', 'w'))
+    if venue not in referees:
+      referees[venue] = []
+    referees[venue].append(publication_id)
+  json.dump(referees, open('../data/json/dim/all/ert/referees.json', 'w'))
 
 
 def get_erts():
@@ -48,5 +48,5 @@ def create_ert(publications, data, sample_size=4):
 
 
 if __name__ == "__main__":
-  get_publications()
+  get_referees()
   get_erts()
