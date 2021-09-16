@@ -27,7 +27,7 @@ def get_advisors():
 def get_erts():
   """ For each advisor in 'advisors' (the file created by get_advisors()), call
   create_ert(). Dump the results in a file. """
-  advisors = json.load(open('../data/json/dim/all/advisors.json'))
+  advisors = json.load(open('../data/json/dim/all/ert/advisors.json'))
   data = json.load(open('../data/json/dim/all/relevant_data.json'))
   erts = {advisor: create_ert(ids, data) for advisor, ids in advisors.items()}
   json.dump(erts, open('../data/json/dim/all/ert/advisor_erts.json', 'w'))
