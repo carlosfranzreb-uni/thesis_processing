@@ -4,6 +4,7 @@ which extracts the references.  """
 
 
 import xml.etree.ElementTree as ET
+import json
 import os
 import logging
 from time import sleep, time
@@ -16,6 +17,26 @@ from tika import parser
 
 oai = '{http://www.openarchives.org/OAI/2.0/}'
 didl = '{urn:mpeg:mpeg21:2002:02-DIDL-NS}'
+base_urls = {
+  'depositonce': 'https://depositonce.tu-berlin.de/oai/request',
+  'edoc': '',
+  'refubium': 'edoc'
+}
+
+
+def extract_refs():
+  """ Extract references of all relevant docs and store them in a dict. """
+  all = {}
+  for repo in ('depositonce', 'edoc', 'refubium'):
+    res = {}
+    ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
+    for id in ids:
+      filename = get_didl_pdf(base_urls[repo], id)
+      parse_pdf(filename)
+      res[id] = get_references(filename)
+    json.dump(res, open(f'data/json/references/{repo}.json'))
+    all.update(res)
+  json.dump(all, open('data/json/references/all.json'))
 
 
 def get_didl_pdf(base_url, id):
@@ -49,19 +70,20 @@ def parse_pdf(filename):
 
 
 def get_references(filename):
-  """ Return the references of the PDF document located at the given URL. """
-  text = open(f'data/txt/{filename}.txt').read()
+  """ Return the references of the TXT document and remove the TXT file. """
+  txt_file = f'data/txt/{filename}.txt'
+  text = open(txt_file).read()
+  os.remove(txt_file)
   return extract_references_from_string(text)
 
 
 if __name__ == '__main__':
   url = 'https://depositonce.tu-berlin.de/bitstream/11303/6967/1/c5cp00289c.pdf'
-  # logging.basicConfig(
-  #   filename=f"logs/extractrefs_{str(int(time()))}.log",
-  #   format='%(asctime)s %(message)s',
-  #   level=logging.INFO
-  # )
-  base_url = 'https://depositonce.tu-berlin.de/oai/request'
+  logging.basicConfig(
+    filename=f"logs/extractrefs_{str(int(time()))}.log",
+    format='%(asctime)s %(message)s',
+    level=logging.INFO
+  )
   id = 'oai:depositonce.tu-berlin.de:11303/6967'
   filename = get_didl_pdf(base_url, id)
   # parse_pdf(filename)
