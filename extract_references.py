@@ -78,15 +78,4 @@ def get_references(filename):
 
 
 if __name__ == '__main__':
-  url = 'https://depositonce.tu-berlin.de/bitstream/11303/6967/1/c5cp00289c.pdf'
-  logging.basicConfig(
-    filename=f"logs/extractrefs_{str(int(time()))}.log",
-    format='%(asctime)s %(message)s',
-    level=logging.INFO
-  )
-  id = 'oai:depositonce.tu-berlin.de:11303/6967'
-  filename = get_didl_pdf(base_url, id)
-  # parse_pdf(filename)
-  refs = get_references(filename)
-  print(refs)
-  # TODO: txt files works, now get refs
+  extract_refs()
