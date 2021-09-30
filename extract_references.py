@@ -74,7 +74,7 @@ def get_references(filename):
   txt_file = f'data/txt/{filename}.txt'
   text = open(txt_file).read()
   os.remove(txt_file)
-  return extract_references_from_string(text)
+  return extract_references_from_string(text, is_only_references=False)
 
 
 if __name__ == '__main__':
