@@ -9,9 +9,8 @@ import logging
 from time import sleep, time
 from pathlib import Path
 
-
 import requests
-# from refextract import extract_references_from_url
+from refextract import extract_references_from_string
 from tika import parser
 
 
@@ -49,22 +48,23 @@ def parse_pdf(filename):
     logging.error(f"Parsing of {filename} failed.")
 
 
-# def get_references(url):
-#   """ Return the references of the PDF document located at the given URL. """
-#   return extract_references_from_url(url)
+def get_references(filename):
+  """ Return the references of the PDF document located at the given URL. """
+  text = open(f'data/txt/{filename}.txt').read()
+  return extract_references_from_string(text)
 
 
 if __name__ == '__main__':
-  # url = 'https://depositonce.tu-berlin.de/bitstream/11303/6967/1/c5cp00289c.pdf'
-  logging.basicConfig(
-    filename=f"logs/extractrefs_{str(int(time()))}.log",
-    format='%(asctime)s %(message)s',
-    level=logging.INFO
-  )
+  url = 'https://depositonce.tu-berlin.de/bitstream/11303/6967/1/c5cp00289c.pdf'
+  # logging.basicConfig(
+  #   filename=f"logs/extractrefs_{str(int(time()))}.log",
+  #   format='%(asctime)s %(message)s',
+  #   level=logging.INFO
+  # )
   base_url = 'https://depositonce.tu-berlin.de/oai/request'
   id = 'oai:depositonce.tu-berlin.de:11303/6967'
   filename = get_didl_pdf(base_url, id)
-  parse_pdf(filename)
-  # refs = get_references(url)
-  # print(refs)
+  # parse_pdf(filename)
+  refs = get_references(filename)
+  print(refs)
   # TODO: txt files works, now get refs
