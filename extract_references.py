@@ -78,4 +78,9 @@ def get_references(filename):
 
 
 if __name__ == '__main__':
+  logging.basicConfig(
+    filename=f"logs/extractrefs_{str(int(time()))}.log",
+    format='%(asctime)s %(message)s',
+    level=logging.INFO
+  )
   extract_refs()
