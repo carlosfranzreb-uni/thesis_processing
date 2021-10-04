@@ -19,8 +19,8 @@ oai = '{http://www.openarchives.org/OAI/2.0/}'
 didl = '{urn:mpeg:mpeg21:2002:02-DIDL-NS}'
 base_urls = {
   'depositonce': 'https://depositonce.tu-berlin.de/oai/request',
-  'edoc': '',
-  'refubium': 'edoc'
+  'edoc': 'https://edoc.hu-berlin.de/oai/request',
+  'refubium': 'https://refubium.fu-berlin.de/oai/request'
 }
 
 
