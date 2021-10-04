@@ -27,7 +27,7 @@ base_urls = {
 def extract_refs():
   """ Extract references of all relevant docs and store them in a dict. """
   all = {}
-  for repo in ('depositonce', 'edoc', 'refubium'):
+  for repo in ['depositonce', 'edoc']:
     logging.info(f'Starting with repo {repo}')
     res = {}
     ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
