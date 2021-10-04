@@ -33,8 +33,9 @@ def extract_refs():
     ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
     for id in ids:
       filename = get_didl_pdf(base_urls[repo], id)
-      parse_pdf(filename)
-      res[id] = get_references(filename)
+      if filename is not None:
+        parse_pdf(filename)
+        res[id] = get_references(filename)
     json.dump(res, open(f'data/json/references/{repo}.json'))
     all.update(res)
   json.dump(all, open('data/json/references/all.json'))
@@ -45,14 +46,18 @@ def get_didl_pdf(base_url, id):
   filename = id.split('/')[-1]
   req = f'{base_url}?verb=GetRecord&identifier={id}&metadataPrefix=didl'
   record = ET.fromstring(requests.get(req).text)
-  pdf_url = record.find(f'{oai}GetRecord').find(f'{oai}record') \
-    .find(f'{oai}metadata').find(f'{didl}DIDL').find(f'{didl}Item') \
-    .find(f'{didl}Component').find(f'{didl}Resource').attrib['ref']
-  pdf_res = requests.get(pdf_url)
-  f = Path(f'data/pdf/{filename}.pdf')
-  f.write_bytes(pdf_res.content)
-  logging.info(f'PDF file of {filename} downloaded.')
-  return filename
+  try:
+    pdf_url = record.find(f'{oai}GetRecord').find(f'{oai}record') \
+      .find(f'{oai}metadata').find(f'{didl}DIDL').find(f'{didl}Item') \
+      .find(f'{didl}Component').find(f'{didl}Resource').attrib['ref']
+    pdf_res = requests.get(pdf_url)
+    f = Path(f'data/pdf/{filename}.pdf')
+    f.write_bytes(pdf_res.content)
+    logging.info(f'PDF file of {filename} downloaded.')
+    return filename
+  except AttributeError as err:
+    logging.error(err)
+    return None
 
 
 def parse_pdf(filename):
