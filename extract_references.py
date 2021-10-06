@@ -17,6 +17,7 @@ from tika import parser
 
 oai = '{http://www.openarchives.org/OAI/2.0/}'
 didl = '{urn:mpeg:mpeg21:2002:02-DIDL-NS}'
+xoai = '{http://www.lyncode.com/xoai}'
 base_urls = {
   'depositonce': 'https://depositonce.tu-berlin.de/oai/request',
   'edoc': 'https://edoc.hu-berlin.de/oai/request',
@@ -24,15 +25,16 @@ base_urls = {
 }
 
 
-def extract_refs():
-  """ Extract references of all relevant docs and store them in a dict. """
+def extract_refs(funcs):
+  """ Extract references of all relevant docs and store them in a dict. 'funcs'
+  stores the functions that should be used to retrieve PDFs for each repo. """
   all = {}
   for repo in ['depositonce', 'edoc']:
     logging.info(f'Starting with repo {repo}')
     res = {}
     ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
     for id in ids:
-      filename = get_didl_pdf(base_urls[repo], id)
+      filename = funcs[repo](base_urls[repo], id)
       if filename is not None:
         if parse_pdf(filename):
           res[id] = get_references(filename)
@@ -55,6 +57,25 @@ def get_didl_pdf(base_url, id):
     f.write_bytes(pdf_res.content)
     logging.info(f'PDF file of {filename} downloaded.')
     return filename
+  except AttributeError as err:
+    logging.error(err)
+    return None
+
+
+def get_xoai_pdf(base_url, id):
+  """ Download the PDF found in the metadata in XOAI format. """
+  filename = id.split('/')[-1]
+  try:
+    req = f'{base_url}?verb=GetRecord&identifier={id}&metadataPrefix=xoai'
+    record = ET.fromstring(requests.get(req).text)
+    for bundle in record.findall(f'.//{xoai}element[@name="bundle"]'):
+      if bundle.find(f'.//{xoai}field[@name="name"]').text == 'ORIGINAL':
+        pdf_url = bundle.find(f'.//{xoai}field[@name="url"]').text
+        pdf_res = requests.get(pdf_url)
+        f = Path(f'data/pdf/{filename}.pdf')
+        f.write_bytes(pdf_res.content)
+        logging.info(f'PDF file of {filename} downloaded.')
+        return filename
   except AttributeError as err:
     logging.error(err)
     return None
@@ -91,4 +112,9 @@ if __name__ == '__main__':
     format='%(asctime)s %(message)s',
     level=logging.INFO
   )
-  extract_refs()
+  pdf_retrieval_funcs = {
+    'depositonce': get_didl_pdf,
+    'edoc': get_didl_pdf,
+    'refubium': get_xoai_pdf
+  }
+  extract_refs(pdf_retrieval_funcs)
