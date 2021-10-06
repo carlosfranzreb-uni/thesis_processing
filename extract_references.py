@@ -49,9 +49,7 @@ def get_didl_pdf(base_url, id):
   req = f'{base_url}?verb=GetRecord&identifier={id}&metadataPrefix=didl'
   record = ET.fromstring(requests.get(req).text)
   try:
-    pdf_url = record.find(f'{oai}GetRecord').find(f'{oai}record') \
-      .find(f'{oai}metadata').find(f'{didl}DIDL').find(f'{didl}Item') \
-      .find(f'{didl}Component').find(f'{didl}Resource').attrib['ref']
+    pdf_url = record.find(f'.//{didl}Component/{didl}Resource').attrib['ref']
     pdf_res = requests.get(pdf_url)
     f = Path(f'data/pdf/{filename}.pdf')
     f.write_bytes(pdf_res.content)
