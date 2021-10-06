@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import json
 import os
 import logging
-from time import sleep, time
+from time import time
 from pathlib import Path
 
 import requests
@@ -34,8 +34,8 @@ def extract_refs():
     for id in ids:
       filename = get_didl_pdf(base_urls[repo], id)
       if filename is not None:
-        parse_pdf(filename)
-        res[id] = get_references(filename)
+        if parse_pdf(filename):
+          res[id] = get_references(filename)
     json.dump(res, open(f'data/json/references/{repo}.json'))
     all.update(res)
   json.dump(all, open('data/json/references/all.json'))
@@ -62,7 +62,7 @@ def get_didl_pdf(base_url, id):
 
 def parse_pdf(filename):
   """ Extract the text of the PDF and store it in a TXT file. Delete the PDF
-  file afterwards. """
+  file afterwards. Return True if the PDF was parsed. else False."""
   try:
     pdf_file = f'data/pdf/{filename}.pdf'
     pdf = parser.from_file(pdf_file)
@@ -71,8 +71,10 @@ def parse_pdf(filename):
         f.write(pdf["content"])
       os.remove(pdf_file)
       logging.info(f'TXT file of {filename} created.')
+      return True
   except requests.exceptions.ReadTimeout:
     logging.error(f"Parsing of {filename} failed.")
+    return False
 
 
 def get_references(filename):
