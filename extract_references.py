@@ -38,9 +38,9 @@ def extract_refs(funcs):
       if filename is not None:
         if parse_pdf(filename):
           res[id] = get_references(filename)
-    json.dump(res, open(f'data/json/references/{repo}.json'))
+    json.dump(res, open(f'data/json/references/{repo}.json', 'w'))
     all.update(res)
-  json.dump(all, open('data/json/references/all.json'))
+  json.dump(all, open('data/json/references/all.json', 'w'))
 
 
 def get_didl_pdf(base_url, id):
