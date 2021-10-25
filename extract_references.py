@@ -28,8 +28,7 @@ base_urls = {
 def extract_refs(funcs):
   """ Extract references of all relevant docs and store them in a dict. 'funcs'
   stores the functions that should be used to retrieve PDFs for each repo. """
-  all = {}
-  for repo in ['depositonce', 'edoc']:
+  for repo in ['depositonce', 'edoc', 'refubium']:
     logging.info(f'Starting with repo {repo}')
     res = {}
     ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
@@ -39,8 +38,6 @@ def extract_refs(funcs):
         if parse_pdf(filename):
           res[id] = get_references(filename)
     json.dump(res, open(f'data/json/references/{repo}.json', 'w'))
-    all.update(res)
-  json.dump(all, open('data/json/references/all.json', 'w'))
 
 
 def get_didl_pdf(base_url, id):
