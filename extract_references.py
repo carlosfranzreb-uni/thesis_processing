@@ -44,8 +44,8 @@ def get_didl_pdf(base_url, id):
   """ Download the PDF found in the metadata in DIDL format. """
   filename = id.split('/')[-1]
   req = f'{base_url}?verb=GetRecord&identifier={id}&metadataPrefix=didl'
-  record = ET.fromstring(requests.get(req).text)
   try:
+    record = ET.fromstring(requests.get(req).text)
     pdf_url = record.find(f'.//{didl}Component/{didl}Resource').attrib['ref']
     pdf_res = requests.get(pdf_url)
     f = Path(f'data/pdf/{filename}.pdf')
