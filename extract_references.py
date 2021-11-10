@@ -71,8 +71,8 @@ def get_xoai_pdf(base_url, id):
         f.write_bytes(pdf_res.content)
         logging.info(f'PDF file of {filename} downloaded.')
         return filename
-  except AttributeError as err:
-    logging.error(err)
+  except Exception as exc:
+    logging.error(exc)
     return None
 
 
