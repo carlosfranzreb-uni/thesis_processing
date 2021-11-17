@@ -1,0 +1,6 @@
+2021-11-11 08:32:32,439 Starting with repo depositonce
+2021-11-11 08:32:33,046 PDF file of 3258 downloaded.
+2021-11-11 08:32:33,047 Retrieving http://search.maven.org/remotecontent?filepath=org/apache/tika/tika-server/1.24/tika-server-1.24.jar to /tmp/tika-server.jar.
+2021-11-11 08:32:34,166 Retrieving http://search.maven.org/remotecontent?filepath=org/apache/tika/tika-server/1.24/tika-server-1.24.jar.md5 to /tmp/tika-server.jar.md5.
+2021-11-11 08:32:34,723 Unable to run java; is it installed?
+2021-11-11 08:32:34,723 Failed to receive startup confirmation from startServer.
