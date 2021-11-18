@@ -28,16 +28,16 @@ base_urls = {
 def extract_refs(funcs):
   """ Extract references of all relevant docs and store them in a dict. 'funcs'
   stores the functions that should be used to retrieve PDFs for each repo. """
-  for repo in ['depositonce', 'edoc', 'refubium']:
-    logging.info(f'Starting with repo {repo}')
-    res = {}
-    ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
-    for id in ids:
-      filename = funcs[repo](base_urls[repo], id)
-      if filename is not None:
-        if parse_pdf(filename):
-          res[id] = get_references(filename)
-    json.dump(res, open(f'data/json/references/{repo}.json', 'w'))
+  repo = 'edoc'
+  logging.info(f'Starting with repo {repo}')
+  res = {}
+  ids = json.load(open(f'data/json/dim/{repo}/relevant_ids.json'))
+  for id in ids:
+    filename = funcs[repo](base_urls[repo], id)
+    if filename is not None:
+      if parse_pdf(filename):
+        res[id] = get_references(filename)
+  json.dump(res, open(f'data/json/references/{repo}_2.json', 'w'))
 
 
 def get_didl_pdf(base_url, id):
@@ -103,7 +103,7 @@ def get_references(filename):
 
 if __name__ == '__main__':
   logging.basicConfig(
-    filename=f"logs/extractrefs_{str(int(time()))}.log",
+    filename=f"logs/extractrefs_edoc_{str(int(time()))}.log",
     format='%(asctime)s %(message)s',
     level=logging.INFO
   )
