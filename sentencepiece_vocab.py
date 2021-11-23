@@ -28,5 +28,15 @@ def load_data():
           yield sentence
 
 
+def train_sentencepiece():
+  """ Train the SP model with the above created data file. """
+  spm.SentencePieceTrainer.train(
+    input='data/txt/raw_text.txt',
+    model_prefix='data/sentencepiece/m',
+    vocab_size=30000,
+    user_defined_symbols=['foo', 'bar']
+  )
+
+
 if __name__ == "__main__":
-  create_input()
+  train_sentencepiece()
