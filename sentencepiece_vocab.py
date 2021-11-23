@@ -10,7 +10,7 @@ from nltk import sent_tokenize
 def create_input():
   """ Input of the trainer must be a TXT file with one sentence of raw text
   in each line. """
-  with open('data/txt/raw_text.txt', 'w', encoding='utf-8') as f:
+  with open('data/txt/raw_text_uncased.txt', 'w', encoding='utf-8') as f:
     for line in load_data():
       f.write(line + '\n')
 
@@ -25,18 +25,19 @@ def load_data():
     for text in data.values():
       if text is not None:
         for sentence in sent_tokenize(text):
-          yield sentence
+          yield sentence.lower()
 
 
 def train_sentencepiece():
   """ Train the SP model with the above created data file. """
   spm.SentencePieceTrainer.train(
-    input='data/txt/raw_text.txt',
-    model_prefix='data/sentencepiece/m',
+    input='data/txt/raw_text_uncased.txt',
+    model_prefix='data/sentencepiece/uncased',
     vocab_size=30000,
     user_defined_symbols=['foo', 'bar']
   )
 
 
 if __name__ == "__main__":
+  create_input()
   train_sentencepiece()
