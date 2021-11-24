@@ -32,12 +32,11 @@ def train_sentencepiece():
   """ Train the SP model with the above created data file. """
   spm.SentencePieceTrainer.train(
     input='data/txt/raw_text_uncased.txt',
-    model_prefix='data/sentencepiece/uncased',
+    model_prefix='data/sentencepiece/bpe_uncased',
     vocab_size=30000,
-    user_defined_symbols=['foo', 'bar']
+    model_type='bpe'
   )
 
 
 if __name__ == "__main__":
-  create_input()
   train_sentencepiece()
