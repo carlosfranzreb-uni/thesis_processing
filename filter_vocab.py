@@ -188,6 +188,15 @@ def remove(arr, idx):
     return arr[:idx] + arr[idx+1:]
 
 
+def keep_1grams(filename):
+  """ Remove all n-grams. """
+  new_vocab = {}
+  vocab = json.load(open(filename, encoding='utf-8'))
+  for entry, cnt in vocab.items():
+    if ' ' not in entry:
+      new_vocab[entry] = cnt
+  json.dump(new_vocab, open(filename, 'w', encoding='utf-8'))
+
 if __name__ == "__main__":
   filename = 'data/vocab/repo_vocab_step_4.json'
   filename_test = 'data/vocab/test/test_vocab.json'
