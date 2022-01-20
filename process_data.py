@@ -11,7 +11,7 @@ from flair.tokenization import SpacyTokenizer
 from flair.models import SequenceTagger
 from nltk.stem import WordNetLemmatizer
 
-from create_vocab import process, filter
+from create_vocab import process
 
 
 class DataProcessor:
