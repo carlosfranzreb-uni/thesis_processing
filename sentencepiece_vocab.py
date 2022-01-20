@@ -1,5 +1,6 @@
 """ Compute the SentencePiece vocabulary of our corpus to compare it to the
-one of SciBERT. SciVOCAB has 30k terms, same as BERT. """
+one of SciBERT. SciVOCAB has 30k terms, same as BERT. SciBERT is only trained
+on 18 % computer science and 82 % biomedical papers (1.14M in total). """
 
 
 import json
