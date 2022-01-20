@@ -42,6 +42,19 @@ class DataProcessor:
     return [token.text for token in tokens]
 
 
+def process_subjects():
+  tokenizer = SpacyTokenizer('en_core_web_sm')
+  lemmatizer = WordNetLemmatizer()
+  tagger = SequenceTagger.load('upos-fast')
+  processor = DataProcessor(tokenizer, tagger, lemmatizer)
+  subjects = json.load(open('data/subjects/subjects.json', encoding='utf-8'))
+  articles = {}
+  for subject in subjects:
+    articles[subject] = processor.process_text(subjects[subject]['article'])
+  print('Done')
+  json.dump(articles, open('data/subjects/articles.json', 'w', encoding='utf-8'))
+
+
 if __name__ == '__main__':
   data = json.load(open('data/json/dim/all/improved_data.json'))
   tokenizer = SpacyTokenizer('en_core_web_sm')
