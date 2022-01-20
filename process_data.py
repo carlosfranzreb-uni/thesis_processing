@@ -44,7 +44,7 @@ class DataProcessor:
 
 if __name__ == '__main__':
   data = json.load(open('data/json/dim/all/improved_data.json'))
-  tokenizer = SpacyTokenizer('en_core_web_lg')
+  tokenizer = SpacyTokenizer('en_core_web_sm')
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
