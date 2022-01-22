@@ -47,12 +47,15 @@ def process_subjects():
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
-  subjects = json.load(open('data/subjects/subjects.json', encoding='utf-8'))
+  subjects = json.load(open('data/openalex/articles.json', encoding='utf-8'))
   articles = {}
-  for subject in subjects:
-    articles[subject] = processor.process_text(subjects[subject]['article'])
+  for subject, article in subjects.items():
+    articles[subject] = processor.process_text(article)
   print('Done')
-  json.dump(articles, open('data/subjects/articles.json', 'w', encoding='utf-8'))
+  json.dump(
+    articles,
+    open('data/openalex/articles_processed.json', 'w', encoding='utf-8')
+  )
 
 
 if __name__ == '__main__':
@@ -61,4 +64,5 @@ if __name__ == '__main__':
   lemmatizer = WordNetLemmatizer()
   tagger = SequenceTagger.load('upos-fast')
   processor = DataProcessor(tokenizer, tagger, lemmatizer)
-  processor.process_data(data, processor.process_text, 'data/json/dim/all/data_lemmas.json')
+  # processor.process_data(data, processor.process_text, 'data/json/dim/all/data_lemmas.json')
+  process_subjects()
